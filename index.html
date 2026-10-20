@@ -1,0 +1,1267 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><meta name="description" content="Az Hashing Lab, a single-file course for hashing, fingerprinting and probabilistic structures"><title>Az Hashing Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#111722;--panel:#192230;--panel2:#202b3a;--panel3:#141c27;--line:#2c394b;--line2:#3b4b61;--text:#e8eef7;--muted:#a7b4c7;--subtle:#8190a5;--accent:#8ab4f8;--strong:#c9ddff;--good:#9ed7bd;--warn:#edc477;--bad:#ff929e;--shadow:none;--radius:13px}
+:root[data-theme=light]{color-scheme:light;--bg:#f4f6f8;--panel:#fff;--panel2:#f7f9fb;--panel3:#f0f4f8;--line:#dce2e9;--line2:#cbd4df;--text:#17212d;--muted:#596a7e;--subtle:#718197;--accent:#315fa2;--strong:#244a82;--good:#176b4c;--warn:#8c5c04;--bad:#b33143;--shadow:0 8px 24px rgba(20,35,50,.05)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button,a,select{touch-action:manipulation}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}a{color:var(--accent);text-decoration:none}.muted{color:var(--muted)}.mono,code,pre,textarea{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.topbar{height:64px;position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:0 22px;background:var(--bg);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text)}.brand-mark{width:34px;height:34px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);display:grid;place-items:center;color:var(--strong);font-weight:850;font-size:16px}.brand strong{display:block;font-size:14px;line-height:1.2}.brand small{display:block;font-size:10px;letter-spacing:.14em;color:var(--muted);margin-top:2px}
+.top-meta{flex:1;color:var(--subtle);font-size:12px;letter-spacing:.02em}
+.top-actions{display:flex;align-items:center;gap:7px}.top-actions label{font-size:11px;color:var(--muted)}
+select,.btn{border:1px solid var(--line2);background:var(--panel3);color:var(--text);border-radius:8px;padding:8px 11px;font-size:12px}.btn{font-weight:600;white-space:nowrap}.btn:hover{border-color:var(--accent);color:var(--strong)}.btn.primary{background:var(--accent);color:#10203a;border-color:var(--accent)}:root[data-theme=light] .btn.primary{color:white}
+.layout{display:grid;grid-template-columns:264px minmax(420px,1fr);max-width:1500px;margin:auto;min-height:calc(100vh - 64px)}
+.sidebar{position:sticky;top:64px;height:calc(100vh - 64px);overflow:auto;border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column}
+.side-title{display:flex;justify-content:space-between;color:var(--subtle);font-size:10px;letter-spacing:.14em;font-weight:800;padding:0 4px 12px}
+.pill,.tag{border:1px solid var(--line2);border-radius:6px;padding:3px 7px;font-size:10px;color:var(--muted);white-space:nowrap}
+.search{display:flex;gap:7px;align-items:center;border:1px solid var(--line);border-radius:9px;background:var(--panel3);height:39px;padding:0 10px;margin-bottom:10px}
+.search input{min-width:0;width:100%;background:transparent;border:0;outline:0;color:var(--text);font-size:12px}
+.search kbd{border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--subtle);font-size:10px}
+.filter{display:block;color:var(--subtle);font-size:11px;margin-bottom:12px}.filter select{display:block;width:100%;max-width:none;margin-top:5px;padding:7px}
+.tree{display:flex;flex-direction:column;gap:12px}
+.group-label{display:flex;justify-content:space-between;color:var(--subtle);font-size:10px;font-weight:800;letter-spacing:.08em;padding:4px 5px}
+.link{width:100%;text-align:left;display:flex;gap:8px;align-items:center;background:transparent;border:1px solid transparent;color:var(--muted);padding:7px 8px;border-radius:8px;min-height:34px}
+.link .num{font:10px ui-monospace,monospace;color:var(--subtle);width:19px;flex:none}
+.link .name{font-size:12px;flex:1}.link .done{color:var(--good)}
+.link:hover{background:var(--panel2);color:var(--text)}
+.link.active{background:var(--panel2);border-color:var(--line2);color:var(--strong)}
+.side-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:14px}
+.progress-row{display:flex;justify-content:space-between;color:var(--subtle);font-size:11px;margin-bottom:7px}
+.progress{height:5px;background:var(--panel2);border-radius:9px;overflow:hidden}.progress>div{height:100%;width:0;background:var(--accent);transition:width .25s}
+.side-actions{display:flex;gap:6px;margin-top:12px}.side-actions .btn{flex:1;padding:7px;font-size:11px}
+main{max-width:920px;width:100%;min-width:0;margin:auto;padding:28px 30px 40px}
+.breadcrumb{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--subtle);margin-bottom:16px}
+.header{padding:2px 2px 22px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.13em;font-weight:800;color:var(--accent);margin-bottom:9px}
+.header h1{font-size:clamp(27px,3vw,36px);line-height:1.12;letter-spacing:-.035em;margin:0 0 10px;font-weight:700}
+.header p{font-size:14.5px;color:var(--muted);margin:0 0 14px;max-width:740px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag.good{color:var(--good)}.tag.warn{color:var(--warn)}
+.header-actions{display:flex;gap:7px;margin-top:16px;flex-wrap:wrap}
+.panel{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.panel-head{padding:18px 20px 0}.panel-head h2{font-size:15px;margin:0 0 4px;letter-spacing:-.01em;font-weight:650}.panel-head p{font-size:12.5px;color:var(--muted);margin:0}
+.body{padding:16px 20px 20px}
+.idea{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:20px}
+.idea p{font-size:13.5px;color:var(--muted);margin:0 0 13px}
+.mental{background:var(--panel3);border:1px solid var(--line);border-radius:10px;padding:13px}
+.mental small{color:var(--subtle);font-size:10px;letter-spacing:.11em;text-transform:uppercase}
+.mental strong{display:block;margin:6px 0;font-size:13px;color:var(--strong)}
+.mental p{font-size:12px;color:var(--muted);margin:0}
+.takeaway{padding:11px 13px;border:1px solid var(--line2);background:var(--panel3);border-radius:8px;color:var(--strong);font-size:12.5px;line-height:1.6}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mini{background:var(--panel3);border:1px solid var(--line);border-radius:10px;padding:13px}
+.mini h3{font-size:12px;margin:0 0 7px;font-weight:650}
+.mini p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.6}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
+.steps li{counter-increment:s;display:flex;gap:10px;color:var(--muted);font-size:12.5px;line-height:1.55}
+.steps li:before{content:counter(s);width:23px;height:23px;flex:none;display:grid;place-items:center;border:1px solid var(--line2);background:var(--panel3);border-radius:6px;color:var(--accent);font:11px ui-monospace,monospace}
+.pseudo{white-space:pre-wrap;overflow:auto;background:var(--panel3);border:1px solid var(--line);border-radius:10px;padding:14px;font:12px/1.75 ui-monospace,monospace;color:var(--strong);margin:0}
+.table-wrap{overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);text-align:left;padding:9px 10px;vertical-align:top}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);font-weight:700}
+td{color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{padding:12px;background:var(--panel3);border:1px solid var(--line);border-radius:9px}
+.tile span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle)}
+.tile strong{display:block;color:var(--strong);font:700 14px ui-monospace,monospace;margin-top:6px}
+.tile small{font-size:10.5px;color:var(--muted);display:block;margin-top:2px}
+.notice{padding:12px 13px;background:var(--panel3);border:1px solid color-mix(in srgb,var(--warn) 35%,var(--line));border-radius:9px;font-size:12.5px;color:var(--muted);line-height:1.65}
+.notice strong{color:var(--warn)}
+.lab-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lab-top label{font-size:11.5px;color:var(--muted)}
+.lab-input{width:100%;min-height:80px;resize:vertical;background:var(--panel3);border:1px solid var(--line2);border-radius:9px;padding:11px;color:var(--text);font:12px/1.65 ui-monospace,monospace;margin:11px 0}
+.lab-output{padding:13px;background:var(--panel3);border:1px solid var(--line);border-radius:9px;min-height:70px;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--strong);font:12px/1.75 ui-monospace,monospace}
+.lab-output svg{width:100%;height:auto;display:block;background:var(--bg);border-radius:7px}
+.lab-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.label{font-size:10px;color:var(--subtle);font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
+.code-head{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:11px 13px;background:var(--panel3);border-bottom:1px solid var(--line)}
+.code-editor{display:block;width:100%;min-height:220px;resize:vertical;border:0;border-radius:0;background:var(--panel3);color:var(--text);padding:15px;font:12px/1.7 ui-monospace,monospace;outline:0}
+.code-foot{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:9px 13px;color:var(--subtle);font-size:10px;border-top:1px solid var(--line)}
+.practice{border:1px solid var(--line);background:var(--panel3);border-radius:9px;padding:13px}
+.practice summary{cursor:pointer;font-size:12.5px;font-weight:600}
+.practice p{font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.65}
+.references{display:flex;flex-direction:column;gap:8px}
+.references a{font-size:12.5px;overflow-wrap:anywhere}
+.home-hero{padding:30px;background:linear-gradient(150deg,var(--panel),var(--panel3));border:1px solid var(--line);border-radius:14px;margin-bottom:16px}
+.home-hero h1{font-size:clamp(30px,3.6vw,42px);line-height:1.1;letter-spacing:-.04em;margin:8px 0 14px;font-weight:700}
+.home-hero p{color:var(--muted);font-size:14px;max-width:720px;margin:0 0 18px;line-height:1.65}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.stat strong{display:block;font:700 22px ui-monospace,monospace;color:var(--strong)}
+.stat span{display:block;font-size:10.5px;color:var(--muted);margin-top:3px}
+.chapter-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chapter-card{padding:14px;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text)}
+.chapter-card:hover{border-color:var(--accent)}
+.chapter-card .num{font-size:10px;color:var(--accent);letter-spacing:.09em;font-weight:800}
+.chapter-card strong{display:block;font-size:13px;margin:5px 0;font-weight:650}
+.chapter-card p{font-size:11.5px;color:var(--muted);margin:0;line-height:1.55}
+.toast{position:fixed;z-index:99;bottom:20px;left:50%;transform:translate(-50%,10px);opacity:0;pointer-events:none;background:var(--panel);border:1px solid var(--line2);border-radius:9px;padding:11px 15px;box-shadow:var(--shadow);font-size:12px;transition:opacity .14s,transform .14s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.footer{font-size:10.5px;color:var(--subtle);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:6px 2px 14px;align-items:center}
+.bar-chart{display:flex;gap:3px;align-items:flex-end;height:70px;margin:6px 0}
+.bar-chart div{flex:1;background:var(--accent);border-radius:2px 2px 0 0;min-height:2px;opacity:.8}
+.bar-label{font-size:9px;color:var(--subtle);font-family:ui-monospace,monospace}
+.bitgrid{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;margin:8px 0;max-width:420px}
+.bitgrid span{display:block;height:14px;border-radius:2px;background:var(--panel3);border:1px solid var(--line)}
+.bitgrid span.on{background:var(--accent);border-color:var(--accent)}
+@media(max-width:1080px){.layout{grid-template-columns:240px minmax(360px,1fr)}main{padding:24px 22px 36px}}
+@media(max-width:840px){.topbar{height:auto;min-height:60px;flex-wrap:wrap;gap:10px;padding:10px 14px}.top-meta{display:none}.top-actions{margin-left:auto}.top-actions label{display:none}.layout{display:block}.sidebar{position:static;height:auto;max-height:none;border:0;border-bottom:1px solid var(--line);padding:14px}.tree{max-height:260px;overflow:auto}.side-foot{display:none}main{padding:20px 15px 32px}.idea{grid-template-columns:1fr}.mental{order:-1}.stats{grid-template-columns:1fr 1fr}.chapter-cards,.two,.lab-cols{grid-template-columns:1fr}}
+@media(max-width:520px){.brand small{display:none}.brand-mark{width:30px;height:30px}.brand strong{font-size:12px}.top-actions select{max-width:92px;padding:6px;font-size:10px}.top-actions .btn{padding:6px 8px;font-size:10px}.chapter-cards{grid-template-columns:1fr}.tiles{grid-template-columns:1fr}.home-hero{padding:20px}.home-hero h1{font-size:30px}.header h1{font-size:27px}.body,.panel-head{padding-left:15px;padding-right:15px}.footer{display:block}.footer span{display:block;margin-bottom:6px}.bitgrid{grid-template-columns:repeat(8,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+@media print{.topbar,.sidebar,.header-actions,.lab-top,.btn,.toast{display:none!important}.layout{display:block}main{padding:0;max-width:none}.panel,.home-hero{break-inside:avoid;box-shadow:none}body{background:#fff;color:#111}}
+</style></head><body>
+
+<header class="topbar">
+  <a class="brand" href="#home" id="homeLink"><span class="brand-mark">Az</span><span><strong>Az Hashing Lab</strong><small>HASHING · FINGERPRINTING · PROBABILISTIC STRUCTURES</small></span></a>
+  <div class="top-meta" id="catalogCount"></div>
+  <div class="top-actions">
+    <label for="themeSelect">Theme</label>
+    <select id="themeSelect" aria-label="Theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select>
+    <button class="btn" id="printBtn">Print / PDF</button>
+    <button class="btn" id="exportBtn">Export</button>
+    <button class="btn" id="importBtn">Import</button>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" aria-label="Course navigation">
+    <div class="side-title"><span>COURSE CATALOG</span><span class="pill" id="lessonCount">0</span></div>
+    <div class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search hashing…" aria-label="Search lessons"><kbd>/</kbd></div>
+    <label class="filter">Chapter<select id="chapterFilter"><option value="all">All chapters</option></select></label>
+    <nav class="tree" id="courseTree" aria-label="Lessons"></nav>
+    <div class="side-foot">
+      <div class="progress-row"><span>COURSE PROGRESS</span><strong id="progressText">0 / 0</strong></div>
+      <div class="progress" id="progressBar"><div id="progressFill"></div></div>
+      <div class="side-actions"><button class="btn" data-page="home">Home</button><button class="btn" data-page="progress">Progress</button></div>
+    </div>
+  </aside>
+  <main id="mainView" tabindex="-1" aria-live="polite"></main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   Az Hashing Lab — data
+   ============================================================ */
+const CHAPTERS=[
+ {id:"fundamentals",title:"1. Hashing fundamentals",desc:"Hash tables, collisions, simple and non-cryptographic hashes, and modern fast hashes.",ids:["hash-tables-basics","simple-hashes","modern-fast-hashes"]},
+ {id:"crypto",title:"2. Cryptographic hashing",desc:"Avalanche, preimage and collision resistance, Merkle–Damgård, sponge constructions and real algorithms.",ids:["crypto-foundations","crypto-algorithms"]},
+ {id:"structures",title:"3. Structures and fingerprints",desc:"Hash chains, Merkle trees, content-addressed storage, perceptual fingerprints and specialized hashes.",ids:["hash-structures","perceptual-fingerprints","specialized-hashes"]},
+ {id:"perfect",title:"4. Perfect hashing and membership",desc:"Minimal perfect hashing and probabilistic membership structures.",ids:["perfect-hashing","probabilistic-membership"]}
+];
+
+const D={
+ kind:"Concept",status:"Concept lesson",level:2,demo:"none",demoTitle:"Interactive teaching lab",inputKind:"text",refs:[],codeKey:"generic",
+ input:"A key, message or data set plus the parameters required by this method.",
+ output:"A fixed-size digest, an index, or a compact membership structure.",
+ invariant:"The encoder and decoder (or the inserter and the querier) must apply exactly the same hash and the same collision rules. Any divergence produces silent wrong answers rather than an error.",
+ complexity:["Implementation dependent","Space depends on the target false-positive or collision rate","Measure on representative data"],
+ uses:"Use this as one layer inside a larger indexing, integrity or lookup pipeline.",
+ strength:"Fits the representation problem it was designed for.",
+ limits:"Depends on the exact algorithm, implementation and data distribution.",
+ pitfall:"Do not confuse a teaching demonstration with a production implementation. Speed and security claims both require measurement.",
+ question:"What is the main idea of this lesson?",
+ trace:null
+};
+function mk(o){
+ const steps=o.steps||["Inspect the input.","Apply the hashing rule.","Produce the digest or index.","Verify determinism and behaviour."];
+ return Object.assign({},D,{
+  summary:o.summary||"",
+  mental:o.mental||o.title,
+  mentalText:o.mentalText||o.summary||"",
+  problem:o.problem||("How do we use "+o.title+" correctly and what does it guarantee?"),
+  steps:steps,
+  trace:o.trace||steps.map((s,i)=>["Step "+(i+1),s,i===steps.length-1?"Verified result":"Representation built"]),
+  answer:o.answer||o.summary||"",
+  pseudo:o.pseudo||"",
+  sample:o.sample||"",
+  level:o.level||2
+ },o);
+}
+
+const RAW=[
+/* ---------- Chapter 1 ---------- */
+{id:"hash-tables-basics",title:"Hash tables, collisions and load factor",level:1,kind:"Foundation",status:"Runnable teaching lab",
+ summary:"A hash table maps a key to a slot by computing a hash and reducing it to an index. Because many keys can share an index, the design must decide how to resolve collisions and when to grow.",
+ mental:"A wall of numbered mailboxes",
+ mentalText:"The hash function computes the mailbox number. Two different keys can land on the same box, so the box must hold more than one item, or the table must look in the next box.",
+ steps:["Compute the hash of the key.","Reduce it to an index, usually with a modulo or a mask.","Resolve collisions by chaining or by probing.","Track the load factor and resize before performance collapses."],
+ pseudo:"index = hash(key) mod m\n\nSeparate chaining:\n  bucket[index] holds a list of entries\n  insert  -> append to the list\n  lookup  -> scan the list\n\nOpen addressing:\n  probe sequence h(k, 0), h(k, 1), h(k, 2) ...\n  linear:      (h(k) + i) mod m\n  quadratic:   (h(k) + c1*i + c2*i^2) mod m\n  double hash: (h1(k) + i * h2(k)) mod m",
+ invariant:"Every key must be found using exactly the probe sequence that was used when it was inserted. Deletion in open addressing must leave a tombstone, not an empty slot, or later probes terminate early and lose keys.",
+ uses:"Dictionaries, symbol tables, database indexes, caches, set membership and deduplication.",
+ strength:"O(1) average lookup and insert with a good hash and a bounded load factor.",
+ limits:"Worst case degrades to O(n). Poor hash functions cluster keys. Open addressing is sensitive to load factor and to deletion.",
+ pitfall:"Deleting from an open-addressed table by clearing the slot is a classic bug. It silently breaks lookups for keys inserted after a collision.",
+ question:"Why does open addressing need tombstones instead of empty slots on deletion?",
+ answer:"A probe stops at the first empty slot. If a deleted slot becomes empty, every key that probed past it becomes unreachable.",
+ demo:"hashtable",sample:"apple, banana, cherry, date, elderberry, fig, grape, honeydew, kiwi, lemon, mango, nectarine",inputKind:"text",
+ refs:[["CLRS, Introduction to Algorithms, Chapter 11: Hash Tables","https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/"]]},
+{id:"simple-hashes",title:"Simple and non-cryptographic hashes",level:2,kind:"Algorithm family",status:"Runnable teaching lab",
+ summary:"Non-cryptographic hashes trade collision resistance for speed. Division and multiplication methods turn a hash into an index; Pearson, FNV, djb2, MurmurHash and xxHash turn bytes into a digest.",
+ mental:"Fast, cheap fingerprints for internal use",
+ mentalText:"These functions are quick to compute and easy to implement. They make no promise about an adversary being unable to find collisions.",
+ steps:["Choose an output width, usually 32 or 64 bits.","Mix every input byte into an accumulator.","Apply finalisation steps to spread bits across the whole output.","Reduce to an index with modulo or a mask."],
+ pseudo:"Division method:      index = key mod m, m usually prime\nMultiplication method: index = floor(m * frac(key * A)),  0 < A < 1\n\ndjb2:     h = 5381; for b: h = h*33 + b\nFNV-1a:   h = offset; for b: h ^= b; h *= prime\nPearson:  h = T[h XOR b]  (T is a fixed 256-byte permutation)\nMurmurHash3 and xxHash add block mixing and avalanche finalisation.",
+ invariant:"A hash function must be deterministic. The same input always produces the same output within the same version and seed.",
+ uses:"Hash tables, bloom filters, checksums of non-adversarial data, sharding, cache keys and deduplication indexes.",
+ strength:"Very fast and simple to implement in any language.",
+ limits:"Not resistant to a deliberate attack that chooses colliding keys. Distribution varies with input type.",
+ pitfall:"djb2 and FNV-1a are fine for a compiler symbol table and dangerous for a public-facing hash table. An attacker who can choose keys can force O(n) behaviour.",
+ question:"Why is the division method usually paired with a prime table size?",
+ answer:"A prime modulus spreads keys more evenly when the hash has patterns that share factors with the table size. Powers of two are worse for a poorly mixed hash but better for masking.",
+ demo:"simplehash",sample:"The quick brown fox jumps over the lazy dog",inputKind:"text"},
+{id:"modern-fast-hashes",title:"Modern fast hashes",level:3,kind:"Algorithm family",status:"Runnable teaching lab",
+ summary:"SipHash resists hash-flooding attacks. wyhash, xxHash3 and HighwayHash push throughput higher. Tabulation and multiply-shift give provable universality for indexing.",
+ mental:"Different tools for speed, safety and provable guarantees",
+ mentalText:"Some of these are chosen because they are fast. Some are chosen because an adversary cannot force collisions. Some give a mathematical guarantee about the collision probability.",
+ steps:["Decide whether the input is adversarial.","Pick a seed size and output width.","Choose a hashing family that matches the threat model.","Measure throughput and collision behaviour on real data."],
+ pseudo:"Multiply-shift universal:\n  h(x) = ((a * x) mod 2^w) >> (w - l),  a odd\n  Pr[h(x) = h(y)] <= 2 / 2^l  for x != y\n\nTabulation hashing:\n  split key into bytes, XOR table lookups\n  each table is a random 256-entry array\n\nSipHash-2-4:\n  128-bit key, 64-bit output, 2 compression rounds and 4 finalisation rounds\n  designed for short inputs such as hash-table keys\n\nwyhash / xxHash3 / HighwayHash:\n  64 or 256-bit outputs, heavy use of 64x64->128 multiply",
+ uses:"Language runtimes use SipHash for hash tables. Databases and storage engines use xxHash and wyhash for checksums. Networking uses HighwayHash for packet authentication.",
+ strength:"Modern fast hashes reach several gigabytes per second on a single core while giving good avalanche.",
+ limits:"Only SipHash and a few siblings are designed against adversarial inputs. Universal families give guarantees but are usually slower per byte.",
+ pitfall:"A seeded hash is only as good as the secrecy of the seed. A public seed is not a defence against a determined attacker.",
+ question:"Why does Python's dict use SipHash instead of a faster non-cryptographic hash?",
+ answer:"SipHash is keyed, so an attacker who does not know the seed cannot precompute colliding keys to force worst-case behaviour.",
+ demo:"fasthash",sample:"The quick brown fox jumps over the lazy dog",inputKind:"text",
+ refs:[["SipHash: a fast short-input PRF","https://131002.net/siphash/"],["xxHash reference implementation","https://github.com/Cyan4973/xxHash"]]},
+/* ---------- Chapter 2 ---------- */
+{id:"crypto-foundations",title:"Cryptographic hash foundations",level:3,kind:"Security foundations",status:"Runnable teaching lab",
+ summary:"A cryptographic hash is a public, deterministic function that is preimage resistant, second-preimage resistant and collision resistant, with strong avalanche behaviour.",
+ mental:"A one-way fingerprint that cannot be forged",
+ mentalText:"Anyone can compute the fingerprint, but nobody can work backwards from it, and nobody can find two different messages with the same fingerprint.",
+ steps:["Read the message as a byte string.","Split into fixed-size blocks.","Compress each block into a fixed-size internal state.","Finalise with length and padding to produce the digest."],
+ pseudo:"Three properties, each strictly stronger than the last:\n\n  preimage resistance:   given h, find m with H(m) = h\n  second preimage:       given m1, find m2 != m1 with H(m2) = H(m1)\n  collision resistance:  find any m1 != m2 with H(m1) = H(m2)\n\nMerkle-Damgard: H(m) = f(f(f(IV, m1), m2), m3) ... with length padding\nSponge:         absorb blocks into a state, then squeeze output",
+ invariant:"Collision resistance implies second-preimage resistance, which implies preimage resistance. The reverse implications do not hold. A 2n-bit digest gives about n bits of collision resistance because of the birthday bound.",
+ uses:"Digital signatures, certificates, password storage, integrity checks, content addressing and key derivation.",
+ strength:"The security reductions are well studied and the interfaces are simple.",
+ limits:"Length extension affects plain Merkle–Damgård hashes. Weak passwords still fall to brute force even with a strong hash.",
+ pitfall:"Never use a raw fast hash such as SHA-256 for passwords. Use a memory-hard password hash such as Argon2id, scrypt or bcrypt.",
+ question:"How many bits of collision resistance does SHA-256 provide?",
+ answer:"About 128. The birthday bound means a collision is expected after roughly 2^128 hashes, not 2^256.",
+ demo:"avalanche",sample:"The quick brown fox jumps over the lazy dog",inputKind:"text",
+ refs:[["NIST FIPS 180-4: Secure Hash Standard","https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf"],["NIST FIPS 202: SHA-3 Standard","https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf"]]},
+{id:"crypto-algorithms",title:"SHA-2, SHA-3, SHAKE and BLAKE2",level:3,kind:"Hash algorithms",status:"Runnable teaching lab",
+ summary:"SHA-2 is a Merkle–Damgård family. SHA-3 and SHAKE use the Keccak sponge. BLAKE2 and BLAKE3 are fast ARX designs. SM3, Streebog and Skein cover national and finalist designs.",
+ mental:"Several engines, one job each",
+ mentalText:"They all produce a fixed-size digest, but they differ in construction, speed, hardware support and how much output they can produce.",
+ steps:["Choose a digest length that matches the security target.","Select a construction that fits the platform and the protocol.","Hash and compare digests in constant time for authentication.","For extendable output, use SHAKE or BLAKE3 in XOF mode."],
+ pseudo:"SHA-1      160 bits   Merkle-Damgard   broken for collisions\nSHA-256    256 bits   Merkle-Damgard   32-bit words\nSHA-512    512 bits   Merkle-Damgard   64-bit words\nSHA3-256   256 bits   Keccak sponge    24-round permutation\nSHAKE128   variable   Keccak sponge    extendable output\nBLAKE2s    256 bits   ARX, 10 rounds\nBLAKE2b    512 bits   ARX, 12 rounds\nBLAKE3     variable   Merkle tree of BLAKE2s-like compression",
+ invariant:"A digest comparison for security must be constant time. A byte-by-byte early-exit comparison leaks how many bytes matched.",
+ uses:"TLS, code signing, blockchain, content addressing, password hashing (as a building block), file integrity and key derivation.",
+ strength:"Hardware acceleration is widespread for SHA-2 and SHA-3 on modern CPUs.",
+ limits:"SHA-1 and MD5 are broken for collision resistance and must not be used for new signatures.",
+ pitfall:"SHA-3 is not a drop-in replacement for SHA-2 in every protocol. The output length and the domain separation must match the specification.",
+ question:"What makes SHAKE different from SHA3-256?",
+ answer:"SHAKE is an extendable-output function. It can produce any number of output bits from the same sponge, while SHA3-256 always produces exactly 256 bits.",
+ demo:"cryptohash",sample:"The quick brown fox jumps over the lazy dog",inputKind:"text",
+ refs:[["BLAKE2 official site and paper","https://www.blake2.net/"],["BLAKE3 specification","https://github.com/BLAKE3-team/BLAKE3-specs"]]},
+/* ---------- Chapter 3 ---------- */
+{id:"hash-structures",title:"Hash chains, Merkle trees and content addressing",level:3,kind:"Data structures",status:"Runnable teaching lab",
+ summary:"A hash chain links each block to its predecessor. A Merkle tree hashes pairs of hashes upward so that any leaf can be proven with a short path. Content-addressed storage names data by its hash.",
+ mental:"A tree of fingerprints that proves a leaf without revealing the rest",
+ mentalText:"The root commits to every leaf. To prove one leaf, you only need the sibling hashes along the path from that leaf to the root.",
+ steps:["Hash each leaf.","Hash each pair of child hashes to form a parent.","Repeat until one root hash remains.","Prove a leaf by revealing its siblings along the path."],
+ pseudo:"leaves  L0 L1 L2 L3\n        \\  /  \\  /\n        H01    H23\n           \\   /\n           root\n\nInclusion proof for L2:\n  reveal L3 and H01\n  verifier recomputes H23 = H(L2 || L3)\n  verifier recomputes root = H(H01 || H23)\n  compare with the known root",
+ invariant:"The hash function must be collision resistant. Without it, an attacker can substitute one subtree for another and produce the same root.",
+ uses:"Git object storage, blockchain, Certificate Transparency logs, IPFS, BitTorrent, ZFS and any append-only audit log.",
+ strength:"Compact proofs of inclusion, efficient verification of large data sets, natural deduplication.",
+ limits:"Proof size grows logarithmically with the number of leaves. Tree shape must be canonical or two parties compute different roots for the same data.",
+ pitfall:"A Merkle proof proves that a leaf is in the tree. It does not prove that the tree represents the real world, or that the leaf was added at a particular time.",
+ question:"How many sibling hashes are needed to prove one leaf in a tree with 1024 leaves?",
+ answer:"Ten, because log2(1024) = 10. The proof size grows logarithmically, not linearly.",
+ demo:"merkle",sample:"alpha\nbeta\ngamma\ndelta\nepsilon\nzeta\neta\ntheta",inputKind:"text",
+ refs:[["RFC 6962: Certificate Transparency","https://www.rfc-editor.org/rfc/rfc6962.html"],["Merkle, A Digital Signature Based on a Conventional Encryption Function","https://link.springer.com/chapter/10.1007/3-540-48184-2_32"]]},
+{id:"perceptual-fingerprints",title:"Perceptual and fuzzy fingerprints",level:3,kind:"Media fingerprinting",status:"Runnable teaching lab",
+ summary:"A perceptual hash converts an image or audio clip into a short fingerprint that stays similar when the content is slightly modified. Fuzzy hashes such as ssdeep and TLSH work on byte streams.",
+ mental:"A fingerprint that survives a haircut and a change of clothes",
+ mentalText:"A cryptographic hash changes completely if a single bit changes. A perceptual hash changes only a little when the content changes a little.",
+ steps:["Reduce the input to a canonical low-resolution representation.","Extract a small set of features, often frequency coefficients or gradients.","Quantise the features into a bit string.","Compare fingerprints with a distance measure such as Hamming distance."],
+ pseudo:"aHash:  resize to 8x8 grey, bit = pixel > mean\n\ndHash:  resize to 9x8 grey, bit = pixel[i] > pixel[i+1]\n\npHash:  resize to 32x32, 2-D DCT, take top-left 8x8\n        excluding DC, bit = coefficient > median\n\nssdeep: context-triggered piecewise hashing of byte chunks\nTLSH:   quartile-based sliding window over a byte stream",
+ uses:"Duplicate detection, copyright matching, content moderation, near-duplicate image search and malware clustering.",
+ strength:"Robust to resizing, mild compression, brightness changes and small edits.",
+ limits:"Not collision resistant. An adversary can craft inputs that collide, and unrelated content can occasionally match.",
+ pitfall:"Perceptual hashes are not cryptographic. Never use them for integrity or authentication. Use them for similarity search only.",
+ question:"Why does pHash use a DCT instead of raw pixel values?",
+ answer:"The DCT concentrates energy into a few low-frequency coefficients, which survive compression and small geometric changes much better than raw pixels.",
+ demo:"perceptual",sample:"",inputKind:"text"},
+{id:"specialized-hashes",title:"Zobrist, rolling, polynomial and locality-sensitive hashes",level:4,kind:"Specialized techniques",status:"Runnable teaching lab",
+ summary:"Specialized hashes exploit structure. Zobrist hashes game positions incrementally. Rolling hashes update a window in O(1). Polynomial hashes and Rabin fingerprints identify substrings. LSH keeps similar items close.",
+ mental:"Hashes designed around a specific update pattern",
+ mentalText:"If you already know the hash of a window, you can often compute the hash of the next window by removing one item and adding another, instead of hashing the whole window again.",
+ steps:["Identify the update pattern: incremental, sliding, or similarity-based.","Choose a family that supports that update in O(1).","Maintain the state as the data changes.","Verify collisions when correctness matters."],
+ pseudo:"Zobrist:\n  random 64-bit value Z[piece][square]\n  position hash = XOR of all Z[piece][square] in play\n  move = XOR out the old, XOR in the new\n\nPolynomial rolling hash:\n  H(s[i..i+L)) = sum s[j] * B^(i+L-1-j) mod p\n  slide: H_new = (H_old - s[i]*B^(L-1)) * B + s[i+L]\n\nRabin fingerprint:\n  polynomial over GF(2), reducible to hardware shift registers\n\nLocality-sensitive hashing (MinHash):\n  signature = min over k hash functions of h(k) for k in the set\n  Jaccard similarity estimated from matching signature positions",
+ uses:"Chess and Go engines, rsync and deduplication, plagiarism detection, near-duplicate search, substring search and shingling.",
+ strength:"O(1) incremental updates and compact signatures for very large item sets.",
+ limits:"Rolling hashes need collision verification. LSH gives probabilistic answers with tunable error.",
+ pitfall:"A Zobrist hash of a board position is not unique. Two different positions can collide, and engines must verify with a full comparison when it matters.",
+ question:"Why does a rolling hash let you slide a window in constant time?",
+ answer:"You subtract the contribution of the byte leaving the window and add the contribution of the byte entering it, using powers of the base precomputed once.",
+ demo:"specialized",sample:"the quick brown fox jumps over the lazy dog. the quick brown fox",inputKind:"text"},
+/* ---------- Chapter 4 ---------- */
+{id:"perfect-hashing",title:"Perfect and minimal perfect hashing",level:4,kind:"Static dictionaries",status:"Runnable teaching lab",
+ summary:"A perfect hash maps a fixed key set to distinct slots with no collisions. A minimal perfect hash uses exactly as many slots as there are keys.",
+ mental:"A custom index built once for a known guest list",
+ mentalText:"Because the key set is known in advance, the hash function can be tuned until every key lands in its own seat.",
+ steps:["Collect the static key set.","Assign keys to buckets with a first-level hash.","For each bucket, search for a displacement that places its keys in free slots.","Store the displacements and the slot table."],
+ pseudo:"FKS two-level scheme:\n  level 1: n keys into n buckets, collisions resolved per bucket\n  level 2: each bucket of size b gets b^2 slots with a fresh hash\n  total expected space O(n)\n\nCHD (hash, displace, compress):\n  level 1: bucket by h1(key) mod n\n  level 2: find d such that h2(key, d) hits distinct free slots\n  store one displacement per bucket\n\nBBHash and RecSplit:\n  recursively split the key set until each part is tiny\n  store a small amount of metadata per level",
+ invariant:"A minimal perfect hash is only defined for the exact key set it was built from. A key outside that set produces an arbitrary slot and must be detected separately.",
+ uses:"Static dictionaries in compilers and databases, read-only lookup tables, routing tables, and fast lookups in bioinformatics.",
+ strength:"O(1) lookup with no collision handling and minimal space.",
+ limits:"Construction can be expensive. Adding or removing a key usually requires a rebuild.",
+ pitfall:"A minimal perfect hash answers where a key would go. It does not tell you whether the key is actually in the set. You still need a membership check.",
+ question:"Why does a minimal perfect hash still need a separate membership test?",
+ answer:"Any key, including one that was never inserted, maps to some slot. Only comparing the stored key at that slot tells you whether it is really present.",
+ demo:"perfect",sample:"apple, banana, cherry, date, elderberry, fig, grape, honeydew",inputKind:"text"},
+{id:"probabilistic-membership",title:"Bloom, cuckoo, quotient and xor filters",level:4,kind:"Probabilistic structures",status:"Runnable teaching lab",
+ summary:"Probabilistic membership structures answer set membership with a controlled false-positive rate and much less memory than storing the keys. None of them produce false negatives.",
+ mental:"A very compact yes-probably list",
+ mentalText:"If the structure says no, the item is definitely not in the set. If it says yes, the item is probably in the set.",
+ steps:["Choose a target false-positive rate and an expected item count.","Size the structure from those two numbers.","Insert items by setting the derived bits or slots.","Query by checking the same bits or slots."],
+ pseudo:"Bloom filter:\n  m bits, k hash functions\n  insert: set k bits\n  query:  all k bits set?  -> maybe present\n  false positive rate  ~  (1 - e^(-kn/m))^k\n  optimal k = (m/n) ln 2\n\nCuckoo filter:\n  store short fingerprints in two candidate buckets\n  insert may relocate existing fingerprints\n  supports deletion\n\nQuotient filter:\n  store the remainder of the hash in a compact open-addressed table\n\nXOR and fuse filters:\n  static filters with very low space per item\n  built once for a fixed key set",
+ invariant:"A Bloom filter never produces a false negative. If a bit is cleared, the item cannot be reported as present. This is why standard Bloom filters do not support deletion.",
+ uses:"Databases (LSM-tree lookups), caches, network routers, spell checkers, malware scanning, and distributed set reconciliation.",
+ strength:"Dramatically less memory than an exact set at a small false-positive rate.",
+ limits:"Cannot enumerate the items. Standard Bloom filters cannot delete. False positives are unavoidable.",
+ pitfall:"A counting Bloom filter supports deletion but uses several bits per counter. Clearing a bit that another item also set causes a false negative, which a Bloom filter is never supposed to produce.",
+ question:"You have 1 million items and want a 1% false-positive rate. Roughly how many bits do you need?",
+ answer:"About 9.6 million bits, or roughly 1.2 MB. The rule of thumb is about 9.6 bits per item for a 1% rate, regardless of the item size.",
+ demo:"bloom",sample:"alpha, beta, gamma, delta, epsilon, zeta, eta, theta, iota, kappa",inputKind:"text",
+ refs:[["Bloom, Space/Time Trade-offs in Hash Coding with Allowable Errors","https://dl.acm.org/doi/10.1145/362686.362692"],["Cuckoo Filter: Practically Better Than Bloom","https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf"]]}
+];
+
+const LESSONS=RAW.map(mk);
+const byId=Object.fromEntries(LESSONS.map(x=>[x.id,x]));
+
+/* ============================================================
+   Code examples
+   ============================================================ */
+const CODE={
+ "hashtable":{python:`class ChainHashTable:\n    """Separate chaining with a prime table size."""\n\n    def __init__(self, size=11):\n        self.size = size\n        self.buckets = [[] for _ in range(size)]\n        self.count = 0\n\n    def _index(self, key):\n        return hash(key) % self.size\n\n    def insert(self, key, value):\n        bucket = self.buckets[self._index(key)]\n        for i, (k, _) in enumerate(bucket):\n            if k == key:\n                bucket[i] = (key, value)\n                return\n        bucket.append((key, value))\n        self.count += 1\n\n    def lookup(self, key):\n        for k, v in self.buckets[self._index(key)]:\n            if k == key:\n                return v\n        raise KeyError(key)\n\n    @property\n    def load_factor(self):\n        return self.count / self.size\n\n\ntable = ChainHashTable()\nfor word in "apple banana cherry date elderberry".split():\n    table.insert(word, len(word))\nprint("load factor:", table.load_factor)\nprint("cherry ->", table.lookup("cherry"))\n`},
+ "simplehash":{python:`def djb2(data: bytes) -> int:\n    h = 5381\n    for b in data:\n        h = ((h << 5) + h + b) & 0xFFFFFFFF\n    return h\n\n\ndef fnv1a32(data: bytes) -> int:\n    h = 2166136261\n    for b in data:\n        h ^= b\n        h = (h * 16777619) & 0xFFFFFFFF\n    return h\n\n\ndef fnv1a64(data: bytes) -> int:\n    h = 14695981039346656037\n    for b in data:\n        h ^= b\n        h = (h * 1099511628211) & 0xFFFFFFFFFFFFFFFF\n    return h\n\n\nmessage = b"The quick brown fox"\nprint("djb2      ", hex(djb2(message)))\nprint("fnv1a32   ", hex(fnv1a32(message)))\nprint("fnv1a64   ", hex(fnv1a64(message)))\nprint("index mod 11:", fnv1a32(message) % 11)\n`},
+ "fasthash":{python:`import struct\n\n\ndef rotl64(x, b):\n    return ((x << b) | (x >> (64 - b))) & 0xFFFFFFFFFFFFFFFF\n\n\ndef siphash24(data: bytes, key: bytes) -> int:\n    """SipHash-2-4, 64-bit output, 128-bit key."""\n    k0, k1 = struct.unpack("<QQ", key)\n    v0 = 0x736F6D6570736575 ^ k0\n    v1 = 0x646F72616E646F6D ^ k1\n    v2 = 0x6C7967656E657261 ^ k0\n    v3 = 0x7465646279746573 ^ k1\n\n    def round_():\n        nonlocal v0, v1, v2, v3\n        v0 = (v0 + v1) & 0xFFFFFFFFFFFFFFFF\n        v1 = rotl64(v1, 13) ^ v0\n        v0 = rotl64(v0, 32)\n        v2 = (v2 + v3) & 0xFFFFFFFFFFFFFFFF\n        v3 = rotl64(v3, 16) ^ v2\n        v0 = (v0 + v3) & 0xFFFFFFFFFFFFFFFF\n        v3 = rotl64(v3, 21) ^ v0\n        v2 = (v2 + v1) & 0xFFFFFFFFFFFFFFFF\n        v1 = rotl64(v1, 17) ^ v2\n        v2 = rotl64(v2, 32)\n\n    end = len(data) - (len(data) % 8)\n    for i in range(0, end, 8):\n        m = struct.unpack("<Q", data[i:i + 8])[0]\n        v3 ^= m\n        round_(); round_()\n        v0 ^= m\n\n    tail = data[end:]\n    b = (len(data) & 0xFF) << 56\n    for i, byte in enumerate(tail):\n        b |= byte << (8 * i)\n    v3 ^= b\n    round_(); round_()\n    v0 ^= b\n\n    v2 ^= 0xFF\n    for _ in range(4):\n        round_()\n    return v0 ^ v1 ^ v2 ^ v3\n\n\nprint(hex(siphash24(b"hello", b"\\x00" * 16)))\n`},
+ "avalanche":{python:`import hashlib\n\n\ndef bits(b: bytes) -> str:\n    return "".join(f"{byte:08b}" for byte in b)\n\n\ndef avalanche(message: bytes):\n    a = hashlib.sha256(message).digest()\n    # flip one bit of the message\n    flipped = bytearray(message)\n    flipped[0] ^= 0x01\n    b = hashlib.sha256(bytes(flipped)).digest()\n    distance = sum(x != y for x, y in zip(bits(a), bits(b)))\n    return distance, len(a) * 8\n\n\nmsg = b"The quick brown fox"\nd, total = avalanche(msg)\nprint(f"flipping one input bit changed {d} of {total} output bits")\nprint(f"expected about {total // 2} bits for a random function")\n`},
+ "cryptohash":{python:`import hashlib\n\nmessage = b"The quick brown fox"\n\nfor name in ("md5", "sha1", "sha256", "sha512", "sha3_256", "sha3_512", "blake2s", "blake2b"):\n    digest = hashlib.new(name, message).hexdigest()\n    print(f"{name:<10} {len(digest) * 4:>4} bits  {digest[:32]}...")\n\n# SHAKE is an extendable-output function\nxof = hashlib.shake_128(message)\nprint("shake128  ", xof.hexdigest(16))\nprint("shake256  ", hashlib.shake_256(message).hexdigest(32))\n`},
+ "merkle":{python:`import hashlib\n\n\ndef h(data: bytes) -> bytes:\n    return hashlib.sha256(data).digest()\n\n\ndef merkle_root(leaves: list[bytes]) -> bytes:\n    if not leaves:\n        return h(b"")\n    level = [h(leaf) for leaf in leaves]\n    while len(level) > 1:\n        if len(level) % 2:\n            level.append(level[-1])  # duplicate the last node\n        level = [h(level[i] + level[i + 1]) for i in range(0, len(level), 2)]\n    return level[0]\n\n\ndef inclusion_proof(leaves: list[bytes], index: int) -> list[tuple[bytes, str]]:\n    level = [h(leaf) for leaf in leaves]\n    proof = []\n    while len(level) > 1:\n        if len(level) % 2:\n            level.append(level[-1])\n        sibling = index ^ 1\n        side = "right" if index % 2 == 0 else "left"\n        proof.append((level[sibling], side))\n        level = [h(level[i] + level[i + 1]) for i in range(0, len(level), 2)]\n        index //= 2\n    return proof\n\n\nleaves = [b"alpha", b"beta", b"gamma", b"delta"]\nroot = merkle_root(leaves)\nprint("root:", root.hex()[:32])\nfor step in inclusion_proof(leaves, 2):\n    print("sibling", step[1], step[0].hex()[:16])\n`},
+ "perceptual":{python:`from PIL import Image\nimport numpy as np\n\n\ndef ahash(path: str, size: int = 8) -> int:\n    img = Image.open(path).convert("L").resize((size, size), Image.LANCZOS)\n    pixels = np.asarray(img, dtype=np.float64)\n    mean = pixels.mean()\n    bits = (pixels > mean).flatten()\n    return int("".join("1" if b else "0" for b in bits), 2)\n\n\ndef dhash(path: str, size: int = 8) -> int:\n    img = Image.open(path).convert("L").resize((size + 1, size), Image.LANCZOS)\n    pixels = np.asarray(img, dtype=np.int64)\n    bits = (pixels[:, 1:] > pixels[:, :-1]).flatten()\n    return int("".join("1" if b else "0" for b in bits), 2)\n\n\ndef hamming(a: int, b: int) -> int:\n    return bin(a ^ b).count("1")\n\n\na = ahash("original.png")\nb = ahash("resized.jpg")\nprint("aHash distance:", hamming(a, b), "out of 64 bits")\n`},
+ "specialized":{python:`import random\n\n# Zobrist hashing for a small board\nSQUARES = 9\nrandom.seed(1)\nZ = [[random.getrandbits(64) for _ in range(SQUARES)] for _ in range(3)]\n\n\ndef zobrist(board: list[int]) -> int:\n    h = 0\n    for square, piece in enumerate(board):\n        if piece:\n            h ^= Z[piece][square]\n    return h\n\n\n# Polynomial rolling hash for substring search\nBASE = 257\nMOD = (1 << 61) - 1\n\n\ndef rolling_hashes(text: str, length: int):\n    if length <= 0 or length > len(text):\n        return\n    high = pow(BASE, length - 1, MOD)\n    h = 0\n    for ch in text[:length]:\n        h = (h * BASE + ord(ch)) % MOD\n    yield 0, h\n    for i in range(length, len(text)):\n        h = (h - ord(text[i - length]) * high) % MOD\n        h = (h * BASE + ord(text[i])) % MOD\n        yield i - length + 1, h\n\n\nboard = [0, 1, 0, 2, 0, 0, 1, 0, 2]\nprint("zobrist:", hex(zobrist(board)))\nprint("window hashes:", [h for _, h in list(rolling_hashes("abracadabra", 4))[:4]])\n`},
+ "perfect":{python:`def fnv1a32(data: bytes) -> int:\n    h = 2166136261\n    for b in data:\n        h ^= b\n        h = (h * 16777619) & 0xFFFFFFFF\n    return h\n\n\ndef build_mph(keys: list[str]):\n    """A small CHD-style minimal perfect hash."""\n    n = len(keys)\n    buckets: dict[int, list[str]] = {}\n    for key in keys:\n        b = fnv1a32(key.encode()) % n\n        buckets.setdefault(b, []).append(key)\n\n    order = sorted(buckets.items(), key=lambda item: -len(item[1]))\n    slots: list[str | None] = [None] * n\n    displacement: dict[int, int] = {}\n\n    for bucket, members in order:\n        d = 0\n        while True:\n            used: set[int] = set()\n            placement = []\n            ok = True\n            for key in members:\n                idx = (fnv1a32(key.encode()) ^ ((d * 0x9E3779B9) & 0xFFFFFFFF)) % n\n                if slots[idx] is not None or idx in used:\n                    ok = False\n                    break\n                used.add(idx)\n                placement.append((idx, key))\n            if ok:\n                for idx, key in placement:\n                    slots[idx] = key\n                displacement[bucket] = d\n                break\n            d += 1\n    return slots, displacement, n\n\n\nkeys = ["apple", "banana", "cherry", "date", "elderberry", "fig"]\nslots, displacement, n = build_mph(keys)\nprint("slots used:", n, "for", len(keys), "keys")\nfor i, key in enumerate(slots):\n    print(f"  {i}: {key}")\n`},
+ "bloom":{python:`import math\n\n\ndef optimal_k(m: int, n: int) -> int:\n    return max(1, round((m / n) * math.log(2)))\n\n\ndef false_positive_rate(m: int, n: int, k: int) -> float:\n    return (1 - math.exp(-k * n / m)) ** k\n\n\nclass BloomFilter:\n    def __init__(self, m: int, k: int):\n        self.m = m\n        self.k = k\n        self.bits = bytearray((m + 7) // 8)\n\n    def _positions(self, key: str):\n        data = key.encode()\n        h1 = hash(data) & 0xFFFFFFFF\n        h2 = (hash(data[::-1]) | 1) & 0xFFFFFFFF\n        return [(h1 + i * h2) % self.m for i in range(self.k)]\n\n    def add(self, key: str) -> None:\n        for pos in self._positions(key):\n            self.bits[pos >> 3] |= 1 << (pos & 7)\n\n    def __contains__(self, key: str) -> bool:\n        return all(self.bits[pos >> 3] & (1 << (pos & 7)) for pos in self._positions(key))\n\n\nn = 10_000\nm = int(n * 9.6)          # about 1% false positives\nk = optimal_k(m, n)\nf = BloomFilter(m, k)\nprint(f"m={m} bits, k={k}, theoretical fp rate={false_positive_rate(m, n, k):.4f}")\n\nfor i in range(n):\n    f.add(f"user:{i}")\n\nprint("user:500 in filter ->", "user:500" in f)\nprint("absent in filter   ->", "nobody:999" in f)\n`},
+};
+
+/* ============================================================
+   Hash implementations
+   ============================================================ */
+const enc=new TextEncoder();
+const toBytes=s=>enc.encode(s);
+const u32=x=>x>>>0;
+const rotl32=(x,n)=>((x<<n)|(x>>>(32-n)))>>>0;
+const rotr32=(x,n)=>((x>>>n)|(x<<(32-n)))>>>0;
+const M64=(1n<<64n)-1n;
+function hex(bytes){return [...bytes].map(b=>b.toString(16).padStart(2,'0')).join('')}
+function hexU32(x){return (x>>>0).toString(16).padStart(8,'0')}
+function hexU64(x){return (x&M64).toString(16).padStart(16,'0')}
+
+/* --- simple hashes --- */
+function djb2(b){let h=5381;for(const x of b)h=((h<<5)+h+x)|0;return h>>>0}
+function fnv1a32(b){let h=2166136261;for(const x of b){h^=x;h=Math.imul(h,16777619)>>>0}return h>>>0}
+function fnv1a64(b){let h=14695981039346656037n;const p=1099511628211n;for(const x of b){h^=BigInt(x);h=(h*p)&M64}return h}
+const PEARSON=(()=>{
+ const t=new Uint8Array(256);for(let i=0;i<256;i++)t[i]=i;
+ let s=0x2545F491;
+ const rnd=()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s>>>0};
+ for(let i=255;i>0;i--){const j=rnd()%(i+1);const tmp=t[i];t[i]=t[j];t[j]=tmp}
+ return t;
+})();
+function pearson(b){let h=0;for(const x of b)h=PEARSON[(h^x)&0xff];return h}
+function murmur3_32(b,seed=0){
+ let h=seed>>>0;const c1=0xcc9e2d51,c2=0x1b873593;
+ const blocks=Math.floor(b.length/4);
+ for(let i=0;i<blocks;i++){
+  let k=(b[i*4]|(b[i*4+1]<<8)|(b[i*4+2]<<16)|(b[i*4+3]<<24))>>>0;
+  k=Math.imul(k,c1)>>>0;k=rotl32(k,15);k=Math.imul(k,c2)>>>0;
+  h^=k;h=rotl32(h,13);h=(Math.imul(h,5)+0xe6546b64)>>>0;
+ }
+ let k=0;const tail=blocks*4;
+ switch(b.length&3){
+  case 3:k^=b[tail+2]<<16;
+  case 2:k^=b[tail+1]<<8;
+  case 1:k^=b[tail];k=Math.imul(k,c1)>>>0;k=rotl32(k,15);k=Math.imul(k,c2)>>>0;h^=k;
+ }
+ h^=b.length;h^=h>>>16;h=Math.imul(h,0x85ebca6b)>>>0;h^=h>>>13;h=Math.imul(h,0xc2b2ae35)>>>0;h^=h>>>16;
+ return h>>>0;
+}
+function readU32(b,i){return (b[i]|(b[i+1]<<8)|(b[i+2]<<16)|(b[i+3]<<24))>>>0}
+function xxh32(b,seed=0){
+ const P1=0x9E3779B1,P2=0x85EBCA77,P3=0xC2B2AE3D,P4=0x27D4EB2F,P5=0x165667B1;
+ const n=b.length;let h;let i=0;
+ if(n>=16){
+  let v1=(seed+P1+P2)>>>0,v2=(seed+P2)>>>0,v3=seed>>>0,v4=(seed-P1)>>>0;
+  const limit=n-16;
+  while(i<=limit){
+   v1=Math.imul(rotl32((v1+Math.imul(readU32(b,i),P2))>>>0,13),P1)>>>0;i+=4;
+   v2=Math.imul(rotl32((v2+Math.imul(readU32(b,i),P2))>>>0,13),P1)>>>0;i+=4;
+   v3=Math.imul(rotl32((v3+Math.imul(readU32(b,i),P2))>>>0,13),P1)>>>0;i+=4;
+   v4=Math.imul(rotl32((v4+Math.imul(readU32(b,i),P2))>>>0,13),P1)>>>0;i+=4;
+  }
+  h=(rotl32(v1,1)+rotl32(v2,7)+rotl32(v3,12)+rotl32(v4,18))>>>0;
+ } else h=(seed+P5)>>>0;
+ h=(h+n)>>>0;
+ while(i+4<=n){h=(h+Math.imul(readU32(b,i),P3))>>>0;h=Math.imul(rotl32(h,17),P4)>>>0;i+=4}
+ while(i<n){h=(h+Math.imul(b[i],P5))>>>0;h=Math.imul(rotl32(h,11),P1)>>>0;i++}
+ h^=h>>>15;h=Math.imul(h,P2)>>>0;h^=h>>>13;h=Math.imul(h,P3)>>>0;h^=h>>>16;
+ return h>>>0;
+}
+function siphash24(b,k0,k1){
+ const rotl=(x,n)=>((x<<BigInt(n))|(x>>BigInt(64-n)))&M64;
+ let v0=0x736f6d6570736575n^k0;
+ let v1=0x646f72616e646f6dn^k1;
+ let v2=0x6c7967656e657261n^k0;
+ let v3=0x7465646279746573n^k1;
+ const round=()=>{
+  v0=(v0+v1)&M64;v1=rotl(v1,13);v1^=v0;v0=rotl(v0,32);
+  v2=(v2+v3)&M64;v3=rotl(v3,16);v3^=v2;
+  v0=(v0+v3)&M64;v3=rotl(v3,21);v3^=v0;
+  v2=(v2+v1)&M64;v1=rotl(v1,17);v1^=v2;v2=rotl(v2,32);
+ };
+ const n=b.length;const end=n-(n%8);
+ for(let i=0;i<end;i+=8){
+  let m=0n;for(let j=7;j>=0;j--)m=(m<<8n)|BigInt(b[i+j]);
+  v3^=m;round();round();v0^=m;
+ }
+ let t=BigInt(n&0xff)<<56n;
+ for(let i=end;i<n;i++)t|=BigInt(b[i])<<BigInt(8*(i-end));
+ v3^=t;round();round();v0^=t;
+ v2^=0xffn;round();round();round();round();
+ return (v0^v1^v2^v3)&M64;
+}
+function tabulationTables(seed){
+ const tables=[];
+ let s=seed>>>0||0x9e3779b9;
+ const rnd=()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s>>>0};
+ for(let t=0;t<4;t++){const tab=new Uint32Array(256);for(let i=0;i<256;i++)tab[i]=rnd();tables.push(tab)}
+ return tables;
+}
+const TABLES=tabulationTables(0x12345678);
+function tabulationHash(key){let h=0;for(let i=0;i<4;i++)h^=TABLES[i][(key>>>(i*8))&0xff];return h>>>0}
+function multiplyShift(key,a,w,l){const mask=(1n<<BigInt(w))-1n;return Number(((BigInt(key)*BigInt(a))&mask)>>BigInt(w-l))}
+
+/* --- Keccak / SHA-3 --- */
+const KECCAK_RC=[0x0000000000000001n,0x0000000000008082n,0x800000000000808an,0x8000000080008000n,0x000000000000808bn,0x0000000080000001n,0x8000000080008081n,0x8000000000008009n,0x000000000000008an,0x0000000000000088n,0x0000000080008009n,0x000000008000000an,0x000000008000808bn,0x800000000000008bn,0x8000000000008089n,0x8000000000008003n,0x8000000000008002n,0x8000000000000080n,0x000000000000800an,0x800000008000000an,0x8000000080008081n,0x8000000000008080n,0x0000000080000001n,0x8000000080008008n];
+const KECCAK_R=[[0,36,3,41,18],[1,44,10,45,2],[62,6,43,15,61],[28,55,25,21,56],[27,20,39,8,14]];
+function keccakF(st){
+ const rotl=(x,n)=>((x<<BigInt(n))|(x>>BigInt(64-n)))&M64;
+ for(let round=0;round<24;round++){
+  const C=[];
+  for(let x=0;x<5;x++)C[x]=st[x]^st[x+5]^st[x+10]^st[x+15]^st[x+20];
+  for(let x=0;x<5;x++){
+   const Dd=C[(x+4)%5]^rotl(C[(x+1)%5],1);
+   for(let y=0;y<5;y++)st[x+5*y]^=Dd;
+  }
+  const B=new Array(25);
+  for(let x=0;x<5;x++)for(let y=0;y<5;y++)B[y+5*((2*x+3*y)%5)]=rotl(st[x+5*y],KECCAK_R[x][y]);
+  for(let x=0;x<5;x++)for(let y=0;y<5;y++)st[x+5*y]=B[x+5*y]^((~B[(x+1)%5+5*y]&M64)&B[(x+2)%5+5*y]);
+  st[0]^=KECCAK_RC[round];
+ }
+}
+function keccak(rateBytes,domain,bytes,outLen){
+ const st=new Array(25).fill(0n);
+ const total=Math.ceil((bytes.length+1)/rateBytes)*rateBytes;
+ const padded=new Uint8Array(total);
+ padded.set(bytes);
+ padded[bytes.length]=domain;
+ padded[total-1]|=0x80;
+ for(let off=0;off<total;off+=rateBytes){
+  for(let i=0;i<rateBytes/8;i++){
+   let lane=0n;
+   for(let j=7;j>=0;j--)lane=(lane<<8n)|BigInt(padded[off+i*8+j]);
+   st[i]^=lane;
+  }
+  keccakF(st);
+ }
+ const out=new Uint8Array(outLen);
+ let produced=0;
+ while(produced<outLen){
+  for(let i=0;i<rateBytes/8&&produced<outLen;i++){
+   const lane=st[i];
+   for(let j=0;j<8&&produced<outLen;j++)out[produced++]=Number((lane>>BigInt(8*j))&0xffn);
+  }
+  if(produced<outLen)keccakF(st);
+ }
+ return out;
+}
+const sha3_256=b=>keccak(136,0x06,b,32);
+const sha3_512=b=>keccak(72,0x06,b,64);
+const shake128=(b,n)=>keccak(168,0x1f,b,n);
+const shake256=(b,n)=>keccak(136,0x1f,b,n);
+
+/* --- BLAKE2s --- */
+const B2S_IV=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+const B2S_SIGMA=[
+ [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+ [14,10,4,8,9,15,13,6,1,12,0,2,11,7,5,3],
+ [11,8,12,0,5,2,15,13,10,14,3,6,7,1,9,4],
+ [7,9,3,1,13,12,11,14,2,6,5,10,4,0,15,8],
+ [9,0,5,7,2,4,10,15,14,1,11,12,6,8,3,13],
+ [2,12,6,10,0,11,8,3,4,13,7,5,15,14,1,9],
+ [12,5,1,15,14,13,4,10,0,7,6,3,9,2,8,11],
+ [13,11,7,14,12,1,3,9,5,0,15,4,8,6,2,10],
+ [6,15,14,9,11,3,0,8,12,2,13,7,1,4,10,5],
+ [10,2,8,4,7,6,1,5,15,11,9,14,3,12,13,0]
+];
+function blake2s(data,outLen=32){
+ const h=B2S_IV.slice();
+ h[0]^=0x01010000^outLen;
+ let t=0;
+ const G=(v,a,b,c,d,x,y)=>{
+  v[a]=(v[a]+v[b]+x)>>>0;v[d]=rotr32(v[d]^v[a],16);
+  v[c]=(v[c]+v[d])>>>0;v[b]=rotr32(v[b]^v[c],12);
+  v[a]=(v[a]+v[b]+y)>>>0;v[d]=rotr32(v[d]^v[a],8);
+  v[c]=(v[c]+v[d])>>>0;v[b]=rotr32(v[b]^v[c],7);
+ };
+ const compress=(blk,last)=>{
+  const m=new Array(16);
+  for(let i=0;i<16;i++)m[i]=(blk[i*4]|(blk[i*4+1]<<8)|(blk[i*4+2]<<16)|(blk[i*4+3]<<24))>>>0;
+  const v=new Array(16);
+  for(let i=0;i<8;i++)v[i]=h[i];
+  v[8]=B2S_IV[0];v[9]=B2S_IV[1];v[10]=B2S_IV[2];v[11]=B2S_IV[3];
+  v[12]=(B2S_IV[4]^(t>>>0))>>>0;
+  v[13]=(B2S_IV[5]^Math.floor(t/4294967296))>>>0;
+  v[14]=(B2S_IV[6]^(last?0xffffffff:0))>>>0;
+  v[15]=B2S_IV[7];
+  for(let r=0;r<10;r++){
+   const s=B2S_SIGMA[r];
+   G(v,0,4,8,12,m[s[0]],m[s[1]]);
+   G(v,1,5,9,13,m[s[2]],m[s[3]]);
+   G(v,2,6,10,14,m[s[4]],m[s[5]]);
+   G(v,3,7,11,15,m[s[6]],m[s[7]]);
+   G(v,0,5,10,15,m[s[8]],m[s[9]]);
+   G(v,1,6,11,12,m[s[10]],m[s[11]]);
+   G(v,2,7,8,13,m[s[12]],m[s[13]]);
+   G(v,3,4,9,14,m[s[14]],m[s[15]]);
+  }
+  for(let i=0;i<8;i++)h[i]=(h[i]^v[i]^v[i+8])>>>0;
+ };
+ let off=0;
+ while(data.length-off>64){
+  t+=64;
+  compress(data.subarray(off,off+64),false);
+  off+=64;
+ }
+ t+=data.length-off;
+ const lastBlock=new Uint8Array(64);
+ lastBlock.set(data.subarray(off));
+ compress(lastBlock,true);
+ const out=new Uint8Array(outLen);
+ for(let i=0;i<outLen;i++)out[i]=(h[i>>2]>>>(8*(i&3)))&0xff;
+ return out;
+}
+
+/* ============================================================
+   Application state and shell
+   ============================================================ */
+const state={page:'home',current:null,completed:new Set(),bookmarks:new Set(),theme:'system',drafts:{},metrics:{steps:0,units:0,tokens:0}};
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1900)}
+function save(){try{localStorage.setItem('az-hashing-lab-v1',JSON.stringify({schemaVersion:1,completed:[...state.completed],bookmarks:[...state.bookmarks],theme:state.theme,current:state.current,drafts:state.drafts}))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem('az-hashing-lab-v1')||'null');if(!d||d.schemaVersion!==1)return;
+ state.completed=new Set((d.completed||[]).filter(id=>byId[id]));
+ state.bookmarks=new Set((d.bookmarks||[]).filter(id=>byId[id]));
+ state.theme=['system','light','dark'].includes(d.theme)?d.theme:'system';
+ state.current=byId[d.current]?d.current:null;
+ state.drafts=d.drafts&&typeof d.drafts==='object'?d.drafts:{};}catch(e){}}
+function applyTheme(){let t=state.theme;if(t==='system')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.dataset.theme=t;$('#themeSelect').value=state.theme}
+function getChapter(id){return CHAPTERS.find(c=>c.ids.includes(id))||CHAPTERS[0]}
+function progress(){
+ const n=state.completed.size,t=LESSONS.length;
+ $('#progressText').textContent=`${n} / ${t}`;
+ $('#progressFill').style.width=(n/t*100)+'%';
+ $('#lessonCount').textContent=t+' lessons';
+ $('#catalogCount').textContent=`${CHAPTERS.length} chapters · ${t} lessons · ${LESSONS.filter(l=>l.demo&&l.demo!=='none').length} interactive labs`;
+ $('#progressBar').setAttribute('aria-valuenow',String(Math.round(n/t*100)));
+}
+function renderTree(){
+ const q=$('#searchInput').value.toLowerCase().trim(),ch=$('#chapterFilter').value;
+ const root=$('#courseTree');root.textContent='';
+ for(const c of CHAPTERS){
+  if(ch!=='all'&&c.id!==ch)continue;
+  const rows=c.ids.map(id=>byId[id]).filter(x=>x&&(!q||(x.title+' '+x.summary+' '+x.kind+' '+c.title).toLowerCase().includes(q)));
+  if(!rows.length)continue;
+  const group=document.createElement('section');
+  const label=document.createElement('div');label.className='group-label';
+  label.innerHTML=`<span>${esc(c.title)}</span><span>${rows.length}</span>`;
+  group.append(label);
+  rows.forEach(l=>{
+   const b=document.createElement('button');b.type='button';
+   b.className='link'+(state.current===l.id?' active':'');
+   b.dataset.lesson=l.id;
+   b.innerHTML=`<span class="num">${String(LESSONS.indexOf(l)+1).padStart(2,'0')}</span><span class="name">${esc(l.title)}</span>${state.completed.has(l.id)?'<span class="done" aria-label="completed">✓</span>':''}`;
+   group.append(b);
+  });
+  root.append(group);
+ }
+ if(!root.children.length)root.innerHTML='<p class="muted">No matching lessons. Try another search.</p>';
+ progress();
+}
+function listToHTML(a){return `<ol class="steps">${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`}
+function refsHTML(r){return r&&r.length?`<div class="references">${r.map(x=>`<a target="_blank" rel="noopener noreferrer" href="${esc(x[1])}">${esc(x[0])} ↗</a>`).join('')}</div>`:'<p class="muted">This lesson is based on established specifications and reference implementations. Consult the relevant standard for a conforming implementation.</p>'}
+function codeRecord(l){if(l.codeKey==='none')return null;return CODE[l.codeKey]||CODE[l.demo]||null}
+function codeText(l){
+ const c=codeRecord(l);
+ if(c&&c.python)return c.python;
+ return '# CONCEPT OUTLINE, NOT EXECUTABLE PYTHON\n# Lesson: '+l.title+'\n\n# Core idea\n# '+String(l.summary||'').replace(/\n/g,'\n# ')+'\n\n# Pseudocode from the lesson\n'+String(l.pseudo||'').split('\n').map(x=>'# '+x).join('\n')+'\n';
+}
+function statusClass(l){return /Runnable/.test(l.status)?'good':'warn'}
+
+/* ============================================================
+   Lesson rendering
+   ============================================================ */
+function renderLesson(id){
+ const l=byId[id];if(!l){renderHome();return}
+ state.page='lesson';state.current=id;
+ const c=getChapter(id);const index=LESSONS.indexOf(l);const next=LESSONS[(index+1)%LESSONS.length];
+ const hasDemo=l.demo&&l.demo!=='none';
+ const demoArea=hasDemo?`<section class="panel"><div class="panel-head"><h2>${esc(l.demoTitle||'Interactive teaching lab')}</h2><p>Everything runs in your browser. This is a teaching model, not a production implementation.</p></div><div class="body"><div class="lab-top"><label for="labInput">Input</label><button class="btn" id="resetSample">Reset sample</button><button class="btn primary" id="runLab">Run lab</button></div><textarea class="lab-input" id="labInput" aria-label="Lab input">${esc(l.sample||'')}</textarea><div class="notice"><strong>Scope:</strong> the Python example below is separate and is not executed by this button. Only the JavaScript lab runs here.</div><div class="lab-cols"><div><div class="label">Output</div><div class="lab-output" id="labEncoded">Run the lab to see output.</div></div><div><div class="label">Explanation</div><div class="lab-output" id="labDecoded">Step notes appear here.</div></div></div></div></section>`:'';
+ const references=refsHTML(l.refs);
+ const code=state.drafts[id]??codeText(l);
+ $('#mainView').innerHTML=`<div class="breadcrumb">Hashing Lab / ${esc(c.title)}</div>
+<header class="header">
+ <div class="eyebrow">LESSON ${String(index+1).padStart(2,'0')} · ${esc(l.kind)}</div>
+ <h1>${esc(l.title)}</h1>
+ <p>${esc(l.summary)}</p>
+ <div class="tags"><span class="tag">Level ${l.level}</span><span class="tag ${statusClass(l)}">${esc(l.status)}</span><span class="tag">${esc(c.title.replace(/^\d+\.\s*/,''))}</span></div>
+ <div class="header-actions">
+  <button class="btn" id="bookmarkBtn">${state.bookmarks.has(id)?'★ Bookmarked':'☆ Bookmark'}</button>
+  <button class="btn primary" id="completeBtn">${state.completed.has(id)?'✓ Completed':'Mark complete'}</button>
+ </div>
+</header>
+<section class="panel"><div class="panel-head"><h2>1. Understand the idea</h2><p>Plain-language explanation and mental picture</p></div><div class="body idea"><div><p>${esc(l.summary)}</p><p><strong>Problem to solve:</strong> ${esc(l.problem)}</p><div class="takeaway"><strong>Takeaway:</strong> ${esc(l.output)}</div></div><aside class="mental"><small>Mental picture</small><strong>${esc(l.mental)}</strong><p>${esc(l.mentalText)}</p></aside></div></section>
+<section class="panel"><div class="panel-head"><h2>2. The problem</h2><p>Know what enters the method and what must come out</p></div><div class="body two"><div class="mini"><h3>Input</h3><p>${esc(l.input)}</p></div><div class="mini"><h3>Output</h3><p>${esc(l.output)}</p></div></div></section>
+<section class="panel"><div class="panel-head"><h2>3. How it works</h2><p>Step-by-step procedure and the key correctness idea</p></div><div class="body two"><div>${listToHTML(l.steps)}<div class="takeaway" style="margin-top:14px"><strong>Key idea:</strong> ${esc(l.invariant)}</div></div><pre class="pseudo">${esc(l.pseudo)}</pre></div><div class="table-wrap" style="margin-top:16px"><table><thead><tr><th>Worked step</th><th>What happens</th><th>Why it matters</th></tr></thead><tbody>${l.trace.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section>
+${demoArea}
+<section class="panel"><div class="panel-head"><h2>4. Properties and cost</h2><p>Complexity depends on the real implementation, the data distribution and the threat model. These labels state the scope rather than claiming a universal benchmark.</p></div><div class="body"><div class="tiles">${l.complexity.map((x,i)=>`<div class="tile"><span>${['Time','Space','Interpretation'][i]}</span><strong>${esc(x.split(' ').slice(0,2).join(' '))}</strong><small>${esc(x)}</small></div>`).join('')}</div><div class="two" style="margin-top:12px"><div class="mini"><h3>Strengths</h3><p>${esc(l.strength)}</p></div><div class="mini"><h3>Limitations</h3><p>${esc(l.limits)}</p></div></div></div></section>
+<section class="panel"><div class="panel-head"><h2>5. Code and practical usage</h2><p>Reference code is for learning. Snippets are not claimed to implement a full standard.</p></div><div class="code-head"><div><span class="tag">${codeRecord(l)?'Python example':'Concept outline, not executable'}</span> <span class="tag">Editable</span></div><div class="header-actions" style="margin:0"><button class="btn" id="copyCode">Copy code</button><button class="btn" id="downloadCode">Download</button></div></div><textarea id="codeEditor" class="code-editor" spellcheck="false" aria-label="Editable Python code">${esc(code)}</textarea><div class="code-foot"><span>${codeRecord(l)?'Reference example only. The built-in lab runs its separate JavaScript model.':'This is a lesson-specific outline, not an implementation.'}</span><span id="codeStatus">Local draft</span></div><div class="body"><div class="mini"><h3>Real-world uses</h3><p>${esc(l.uses)}</p></div><div class="notice" style="margin-top:12px"><strong>Common pitfall:</strong> ${esc(l.pitfall)}</div></div></section>
+<section class="panel"><div class="panel-head"><h2>6. Alternatives and choice</h2><p>Choose based on the data, constraints and the guarantee you actually need</p></div><div class="body two"><div class="mini"><h3>When this approach fits</h3><p>${esc(l.strength)}</p></div><div class="mini"><h3>When to consider another method</h3><p>${esc(l.limits)}</p></div></div></section>
+<section class="panel"><div class="panel-head"><h2>7. Check your understanding</h2><p>Try to answer before revealing the explanation</p></div><div class="body"><details class="practice"><summary>${esc(l.question)}</summary><p>${esc(l.answer)}</p></details></div></section>
+<section class="panel"><div class="panel-head"><h2>8. References and scope</h2><p>Use official specifications for interoperable and secure implementations</p></div><div class="body">${references}<p class="muted" style="font-size:11.5px;margin-top:14px">A concept lesson explains the method and its context. Only the explicitly marked labs are executable here. This single file does not contain production implementations of every named algorithm.</p></div></section>
+<footer class="footer"><span>Az Hashing Lab · local-first learning</span><span>Lesson ${index+1} of ${LESSONS.length} · Next: ${esc(next.title)}</span><button class="btn" id="nextLesson">Next lesson →</button></footer>`;
+
+ $('#bookmarkBtn').onclick=()=>{state.bookmarks.has(id)?state.bookmarks.delete(id):state.bookmarks.add(id);save();renderLesson(id);toast(state.bookmarks.has(id)?'Bookmarked':'Bookmark removed')};
+ $('#completeBtn').onclick=()=>{state.completed.has(id)?state.completed.delete(id):state.completed.add(id);save();renderTree();renderLesson(id);toast(state.completed.has(id)?'Lesson completed':'Completion removed')};
+ $('#nextLesson').onclick=()=>openLesson(next.id);
+ $('#copyCode').onclick=async()=>{const v=$('#codeEditor').value;try{await navigator.clipboard.writeText(v);toast('Code copied')}catch{const ta=$('#codeEditor');ta.select();document.execCommand('copy');toast('Code copied')}};
+ $('#downloadCode').onclick=()=>{const r=codeRecord(l);downloadText(`${id}.${r?'py':'txt'}`,$('#codeEditor').value,r?'text/x-python':'text/plain')};
+ $('#codeEditor').addEventListener('input',()=>{state.drafts[id]=$('#codeEditor').value;save();$('#codeStatus').textContent='Draft saved locally'});
+ if(hasDemo){
+  $('#runLab').onclick=()=>runLab(l);
+  $('#resetSample').onclick=()=>{$('#labInput').value=l.sample||'';$('#labEncoded').textContent='Run the lab to see output.';$('#labDecoded').textContent='Step notes appear here.';state.metrics={steps:0,units:0,tokens:0}};
+  runLab(l,true);
+ }
+ renderTree();save();
+ if(location.hash!==`#${id}`)history.replaceState(null,'',`#${id}`);
+}
+
+function renderHome(){
+ state.page='home';
+ $('#mainView').innerHTML=`<div class="home-hero"><div class="eyebrow">AZ · ENGINEERING TOOLBOOK</div><h1>Understand hashing from a mailbox index to a cryptographic commitment.</h1><p>A beginner-first course covering hash tables, non-cryptographic and cryptographic hashes, hash-based data structures, perceptual fingerprints, specialized hashes, minimal perfect hashing and probabilistic membership structures. Every lesson pairs a plain-language explanation with a runnable lab.</p><div class="header-actions" style="margin:0"><button class="btn primary" id="startFirst">Start at fundamentals</button><button class="btn" id="resumeLesson">Continue lesson</button></div></div>
+<div class="stats"><div class="stat"><strong>${CHAPTERS.length}</strong><span>learning chapters</span></div><div class="stat"><strong>${LESSONS.length}</strong><span>lesson pages</span></div><div class="stat"><strong>${LESSONS.filter(l=>l.demo&&l.demo!=='none').length}</strong><span>interactive labs</span></div><div class="stat"><strong>1</strong><span>standalone HTML file</span></div></div>
+<section class="panel"><div class="panel-head"><h2>Honest scope assessment</h2><p>One app can cover the whole curriculum. Production-grade cryptographic implementations remain a separate engineering project.</p></div><div class="body two"><div class="mini"><h3>Working inside this app</h3><p>Chain and open-addressing hash tables with live bucket distribution, djb2, FNV-1a 32 and 64, Pearson, MurmurHash3, xxHash32, SipHash-2-4, tabulation and multiply-shift universal hashing, SHA-1/SHA-256/SHA-384/SHA-512 through the native Web Crypto API, SHA3-256, SHA3-512, SHAKE128 and SHAKE256 through an in-page Keccak implementation, BLAKE2s, avalanche measurement, Merkle tree construction with inclusion proofs, aHash, dHash and pHash on canvas-generated and uploaded images, Zobrist hashing, rolling polynomial hashes, MinHash signatures, CHD-style minimal perfect hashing, Bloom filters with a measured false-positive rate, and cuckoo filters with relocation.</p></div><div class="mini"><h3>Not claimed as complete</h3><p>A production BLAKE3 tree implementation, a verified SM3, Streebog or Skein implementation, a full ssdeep or TLSH fuzzy hasher, a hardware-accurate HighwayHash or wyhash, an xor or fuse filter, and any cryptographic implementation suitable for protecting real secrets. Those require maintained libraries, test vectors and conformance testing.</p></div></div></section>
+<div class="panel"><div class="panel-head"><h2>Course map</h2><p>Choose any chapter. The learning path moves from foundations to probabilistic structures.</p></div><div class="body"><div class="chapter-cards">${CHAPTERS.map((c,i)=>`<button class="chapter-card" data-chapter="${c.id}"><span class="num">CHAPTER ${String(i+1).padStart(2,'0')} · ${c.ids.length} LESSONS</span><strong>${esc(c.title.replace(/^\d+\.\s*/,''))}</strong><p>${esc(c.desc)}</p></button>`).join('')}</div></div></div>
+<footer class="footer"><span>Az Hashing Lab</span><span>Single file · no external runtime dependencies</span></footer>`;
+ $('#startFirst').onclick=()=>openLesson('hash-tables-basics');
+ $('#resumeLesson').onclick=()=>openLesson(state.current&&byId[state.current]?state.current:'hash-tables-basics');
+ $('#mainView').querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>{const c=CHAPTERS.find(x=>x.id===b.dataset.chapter);if(c)openLesson(c.ids[0])});
+}
+
+function renderProgressPage(){
+ state.page='progress';
+ $('#mainView').innerHTML=`<div class="breadcrumb">Hashing Lab / Bookmarks & progress</div><header class="header"><div class="eyebrow">LOCAL ONLY</div><h1>Bookmarks and progress</h1><p>Progress is kept in this browser. Export JSON to move it or keep a backup.</p></header>
+<section class="panel"><div class="panel-head"><h2>Completed lessons</h2></div><div class="body">${state.completed.size?`<div class="references">${[...state.completed].map(id=>`<a href="#${id}" data-open="${id}">${esc(byId[id].title)}</a>`).join('')}</div>`:'<p class="muted">No lessons marked complete yet.</p>'}</div></section>
+<section class="panel"><div class="panel-head"><h2>Bookmarks</h2></div><div class="body">${state.bookmarks.size?`<div class="references">${[...state.bookmarks].map(id=>`<a href="#${id}" data-open="${id}">${esc(byId[id].title)}</a>`).join('')}</div>`:'<p class="muted">No bookmarks yet.</p>'}</div></section>
+<section class="panel"><div class="panel-head"><h2>Progress data</h2></div><div class="body"><div class="header-actions" style="margin:0"><button class="btn primary" id="exportProgress">Export progress JSON</button><button class="btn" id="clearProgress">Clear completion marks</button></div><p class="muted" style="font-size:12.5px;margin-top:14px">Import accepts only known lesson IDs and a supported schema version.</p></div></section>`;
+ $('#mainView').querySelectorAll('[data-open]').forEach(a=>a.onclick=e=>{e.preventDefault();openLesson(a.dataset.open)});
+ $('#exportProgress').onclick=exportProgress;
+ $('#clearProgress').onclick=()=>{if(confirm('Clear all completion marks?')){state.completed.clear();save();renderProgressPage();renderTree();toast('Completion marks cleared')}};
+}
+
+function openLesson(id){if(!byId[id])return;renderLesson(id);renderTree();$('#mainView').focus({preventScroll:true});window.scrollTo(0,0)}
+function downloadText(name,text,type='text/plain'){const blob=new Blob([text],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),800)}
+function exportProgress(){downloadText('az-hashing-lab-progress.json',JSON.stringify({schemaVersion:1,completed:[...state.completed],bookmarks:[...state.bookmarks],theme:state.theme,current:state.current,drafts:state.drafts},null,2),'application/json');toast('Progress exported')}
+function importProgressFile(file){
+ if(file.size>2_000_000){toast('Import rejected: file too large');return}
+ const r=new FileReader();
+ r.onload=()=>{try{
+  const d=JSON.parse(r.result);
+  if(!d||d.schemaVersion!==1||!Array.isArray(d.completed)||!Array.isArray(d.bookmarks)||typeof d.drafts!=='object')throw Error('bad schema');
+  if([...d.completed,...d.bookmarks].some(id=>typeof id!=='string'||!byId[id]))throw Error('unknown id');
+  state.completed=new Set(d.completed);
+  state.bookmarks=new Set(d.bookmarks);
+  state.theme=['system','light','dark'].includes(d.theme)?d.theme:'system';
+  state.current=byId[d.current]?d.current:null;
+  state.drafts=Object.fromEntries(Object.entries(d.drafts).filter(([k,v])=>byId[k]&&typeof v==='string'&&v.length<100000));
+  applyTheme();save();renderTree();
+  state.current?openLesson(state.current):renderHome();
+  toast('Progress imported');
+ }catch(e){toast('Import rejected: invalid progress data')}};
+ r.readAsText(file);
+}
+
+/* ============================================================
+   Shared helpers
+   ============================================================ */
+function parseList(s){return s.split(/[,\n]/).map(x=>x.trim()).filter(Boolean)}
+function svgWrap(inner,vb){return `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" role="img">${inner}</svg>`}
+function barRow(counts,labels){
+ const max=Math.max(1,...counts);
+ return `<div class="bar-chart">${counts.map(c=>`<div style="height:${(c/max*100).toFixed(1)}%" title="${c}"></div>`).join('')}</div><div class="bar-label">${labels.join(' · ')}</div>`;
+}
+function bitGrid(bits){
+ return `<div class="bitgrid">${bits.map(b=>`<span class="${b?'on':''}"></span>`).join('')}</div>`;
+}
+
+/* ============================================================
+   Labs
+   ============================================================ */
+function demoHashTable(text){
+ const keys=parseList(text);
+ if(!keys.length)throw Error('Enter comma-separated keys.');
+ const m=11;
+ const chain=Array.from({length:m},()=>[]);
+ let collisions=0;
+ for(const k of keys){
+  const idx=fnv1a32(toBytes(k))%m;
+  if(chain[idx].length)collisions++;
+  chain[idx].push(k);
+ }
+ const oa=new Array(m).fill(null);
+ let oaCollisions=0,probesTotal=0;
+ for(const k of keys){
+  let i=fnv1a32(toBytes(k))%m,probes=0;
+  while(oa[i]!==null){i=(i+1)%m;probes++;if(probes>=m)break}
+  if(probes)oaCollisions++;
+  probesTotal+=probes;
+  if(i<m&&oa[i]===null)oa[i]=k;
+ }
+ const counts=chain.map(b=>b.length);
+ let out='Separate chaining (m = '+m+'):\n';
+ chain.forEach((b,i)=>{
+  const bar='█'.repeat(b.length);
+  out+=`  [${String(i).padStart(2)}] ${bar}${b.length?' '+b.join(', '):''}\n`;
+ });
+ out+='\nOpen addressing, linear probing:\n';
+ oa.forEach((k,i)=>{out+=`  [${String(i).padStart(2)}] ${k??'·'}\n`});
+ const lf=(keys.length/m).toFixed(3);
+ const longest=Math.max(...counts);
+ return {
+  encoded:out,
+  decoded:`Keys inserted: ${keys.length}\nTable size m: ${m}\nLoad factor: ${lf}\n\nChaining:\n  collision events: ${collisions}\n  longest chain: ${longest}\n  average chain length: ${(keys.length/m).toFixed(2)}\n\nOpen addressing:\n  collision events: ${oaCollisions}\n  total extra probes: ${probesTotal}\n\nA load factor above about 0.75 makes open addressing degrade quickly. Chaining tolerates a higher load factor but wastes memory on bucket lists.`,
+  steps:keys.length,units:collisions+oaCollisions,tokens:keys.length
+ };
+}
+
+function demoSimpleHash(text){
+ const b=toBytes(text);
+ const d=djb2(b);
+ const f32=fnv1a32(b);
+ const f64=fnv1a64(b);
+ const p=pearson(b);
+ const mm=murmur3_32(b);
+ const xx=xxh32(b);
+ const m=13;
+ const A=0.6180339887498949;
+ const divIdx=f32%m;
+ const multIdx=Math.floor(m*((f32*A)%1));
+ return {
+  encoded:`input bytes: ${b.length}\n\n`+
+   `djb2           0x${hexU32(d)}\n`+
+   `FNV-1a 32      0x${hexU32(f32)}\n`+
+   `FNV-1a 64      0x${hexU64(f64)}\n`+
+   `Pearson 8-bit  0x${p.toString(16).padStart(2,'0')}\n`+
+   `MurmurHash3    0x${hexU32(mm)}\n`+
+   `xxHash32       0x${hexU32(xx)}\n\n`+
+   `Index into a table of size ${m}:\n`+
+   `  division method      ${divIdx}\n`+
+   `  multiplication method ${multIdx}`,
+  decoded:`Every function here is deterministic and returns the same value for the same bytes.\n\nDivision method: index = hash mod m. Choosing a prime m spreads keys better when the hash has weak low bits.\nMultiplication method: index = floor(m * frac(key * A)) with A = (sqrt(5)-1)/2. It uses the high bits of the product, so it tolerates a weaker low end.\n\nPearson returns only 8 bits. Run it several times with different starting offsets and concatenate the results to build a wider digest.\n\nNone of these resist a deliberate collision attack. For an adversarial key set, use a keyed hash such as SipHash.`,
+  steps:b.length,units:6,tokens:6
+ };
+}
+
+function demoFastHash(text){
+ const b=toBytes(text);
+ const k0=0x0706050403020100n,k1=0x0f0e0d0c0b0a0908n;
+ const sip=siphash24(b,k0,k1);
+ const xx=xxh32(b);
+ const mm=murmur3_32(b);
+ // multiply-shift over a 32-bit key derived from FNV
+ const key=fnv1a32(b);
+ const a=0x9e3779b1;
+ const ms16=multiplyShift(key,a,32,16);
+ const ms8=multiplyShift(key,a,32,8);
+ const tab=tabulationHash(key);
+ const tableSvg=`<div class="bar-chart">${[...Array(16)].map((_,i)=>{const v=tabulationHash(key^(i*0x9e3779b9))>>>0;return `<div style="height:${((v%1000)/10).toFixed(1)}%"></div>`}).join('')}</div><div class="bar-label">tabulation hashes of 16 key variants</div>`;
+ return {
+  encoded:`input bytes: ${b.length}\n\nSipHash-2-4 (keyed)  0x${hexU64(sip)}\nxxHash32             0x${hexU32(xx)}\nMurmurHash3 x86 32   0x${hexU32(mm)}\n\nMultiply-shift, 32 -> 16 bits: ${ms16}\nMultiply-shift, 32 -> 8 bits:  ${ms8}\nTabulation hash:               0x${hexU32(tab)}`,
+  html:tableSvg,
+  decoded:`SipHash is keyed. With a secret 128-bit key, an attacker cannot precompute colliding inputs, which is why language runtimes use it for hash tables.\n\nMultiply-shift is provably universal: for any two distinct keys x and y, the probability that they collide is at most 2 / 2^l over a random odd multiplier a. The guarantee holds only if a is chosen uniformly at random and kept secret from the adversary.\n\nTabulation hashing splits the key into bytes and XORs independent table lookups. It is fast and gives good independence for hash tables and cuckoo filters.\n\nxxHash32 and MurmurHash3 are fast and well distributed but unkeyed. They are suitable for checksums and non-adversarial indexing.`,
+  steps:b.length,units:6,tokens:6
+ };
+}
+
+async function shaHex(algo,bytes){
+ const buf=await crypto.subtle.digest(algo,bytes);
+ return hex(new Uint8Array(buf));
+}
+async function demoAvalanche(text){
+ if(!(crypto&&crypto.subtle))throw Error('Web Crypto is not available in this browser. Use a recent browser over HTTPS or localhost.');
+ const b=toBytes(text);
+ if(!b.length)throw Error('Enter some text to hash.');
+ const base=await shaHex('SHA-256',b);
+ const rows=[];
+ const sample=[0,1,2,3].filter(i=>i<b.length);
+ if(!sample.length)sample.push(0);
+ for(const idx of sample){
+  const flipped=new Uint8Array(b);
+  flipped[idx]^=0x01;
+  const h=await shaHex('SHA-256',flipped);
+  const a=hex(base),c=hex(h);
+  let diff=0;
+  for(let i=0;i<64;i++){
+   const x=parseInt(a[i],16),y=parseInt(c[i],16);
+   diff+=((x^y).toString(2).match(/1/g)||[]).length;
+  }
+  rows.push({idx,hex:c,diff});
+ }
+ const first=await shaHex('SHA-256',b);
+ const firstBits=[...first].flatMap(ch=>parseInt(ch,16).toString(2).padStart(4,'0').split('').map(Number));
+ const second=rows[0];
+ const secondBits=[...second.hex].flatMap(ch=>parseInt(ch,16).toString(2).padStart(4,'0').split('').map(Number));
+ const grid=bitGrid(firstBits.slice(0,128));
+ return {
+  encoded:`SHA-256 of the input:\n  ${first}\n\n`+
+   rows.map(r=>`flip bit 0 of byte ${r.idx}:\n  ${r.hex}\n  Hamming distance: ${r.diff} / 256 bits (${(r.diff/256*100).toFixed(1)}%)`).join('\n\n'),
+  html:grid+'<div class="bar-label">first 128 bits of the SHA-256 digest of the unmodified input</div>',
+  decoded:`A cryptographic hash behaves like a random function. Flipping one input bit should change each output bit with probability about one half, giving an expected Hamming distance near 128 of 256 bits.\n\nObserved distances: ${rows.map(r=>r.diff).join(', ')} bits out of 256.\n\nThis avalanche property is necessary but not sufficient for security. It says nothing about collision or preimage resistance, which are separate and much harder to achieve.`,
+  steps:b.length,units:256,tokens:256
+ };
+}
+
+async function demoCryptoHash(text){
+ const b=toBytes(text);
+ if(!b.length)throw Error('Enter some text to hash.');
+ const results=[];
+ if(crypto&&crypto.subtle){
+  for(const algo of ['SHA-1','SHA-256','SHA-384','SHA-512']){
+   try{results.push({name:algo,hex:await shaHex(algo,b)})}catch(e){}
+  }
+ }
+ results.push({name:'SHA3-256',hex:hex(sha3_256(b))});
+ results.push({name:'SHA3-512',hex:hex(sha3_512(b))});
+ results.push({name:'SHAKE128(32B)',hex:hex(shake128(b,32))});
+ results.push({name:'SHAKE256(64B)',hex:hex(shake256(b,64))});
+ results.push({name:'BLAKE2s-256',hex:hex(blake2s(b,32))});
+ const out=results.map(r=>`${r.name.padEnd(14)} ${r.hex.length*4} bits  ${r.hex}`).join('\n');
+ const check=results.find(r=>r.name==='SHA-256');
+ const note=[];
+ if(check){
+  const empty=await shaHex('SHA-256',new Uint8Array(0));
+  note.push(`SHA-256 of the empty string: ${empty}`);
+  note.push(`Known value:                 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`);
+  note.push(`Match: ${empty==='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'?'yes':'no'}`);
+ }
+ const sha3check=hex(sha3_256(new Uint8Array(0)));
+ note.push(`SHA3-256 of the empty string: ${sha3check}`);
+ note.push(`Known value:                  a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a`);
+ note.push(`Match: ${sha3check==='a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a'?'yes':'no'}`);
+ return {
+  encoded:out,
+  decoded:`SHA-1, SHA-256, SHA-384 and SHA-512 are computed by the browser's native Web Crypto implementation.\nSHA3-256, SHA3-512, SHAKE128, SHAKE256 and BLAKE2s are computed by JavaScript running on this page.\n\nSelf-check against published test vectors:\n${note.join('\n')}\n\nSHA-1 and MD5 are broken for collision resistance. Do not use them for signatures or certificates. They remain acceptable only where collision resistance is not required, such as some non-adversarial checksums.`,
+  steps:b.length,units:results.length,tokens:results.reduce((s,r)=>s+r.hex.length/2,0)
+ };
+}
+
+async function demoMerkle(text){
+ const leaves=parseList(text);
+ if(leaves.length<2)throw Error('Enter at least two lines of text.');
+ if(!(crypto&&crypto.subtle))throw Error('Web Crypto is not available in this browser.');
+ async function h(bytes){
+  const buf=await crypto.subtle.digest('SHA-256',bytes);
+  return new Uint8Array(buf);
+ }
+ async function concat(a,b){const out=new Uint8Array(a.length+b.length);out.set(a);out.set(b,a.length);return out}
+ let level=await Promise.all(leaves.map(l=>h(toBytes(l))));
+ const levels=[level.map(x=>hex(x))];
+ while(level.length>1){
+  const arr=[];
+  const src=level.length%2?[...level,level[level.length-1]]:level;
+  for(let i=0;i<src.length;i+=2)arr.push(await h(await concat(src[i],src[i+1])));
+  level=arr;
+  levels.push(level.map(x=>hex(x)));
+ }
+ const root=levels[levels.length-1][0];
+ // inclusion proof for leaf 0
+ let idx=0;
+ let lvl=await Promise.all(leaves.map(l=>h(toBytes(l))));
+ const proof=[];
+ while(lvl.length>1){
+  const src=lvl.length%2?[...lvl,lvl[lvl.length-1]]:lvl;
+  const sibling=idx^1;
+  const side=idx%2===0?'right':'left';
+  proof.push({side,hash:hex(src[sibling])});
+  const next=[];
+  for(let i=0;i<src.length;i+=2)next.push(await h(await concat(src[i],src[i+1])));
+  lvl=next;
+  idx=Math.floor(idx/2);
+ }
+ let treeOut='';
+ levels.forEach((lv,depth)=>{
+  treeOut+=`depth ${depth}  (${lv.length} node${lv.length===1?'':'s'})\n`;
+  lv.slice(0,6).forEach((h,i)=>{treeOut+=`  ${String(i).padStart(3)}  ${h.slice(0,32)}…\n`});
+  if(lv.length>6)treeOut+=`  … ${lv.length-6} more\n`;
+  treeOut+='\n';
+ });
+ return {
+  encoded:`Leaves: ${leaves.length}\n\nRoot: ${root}\n\n${treeOut}`,
+  decoded:`Inclusion proof for leaf "${leaves[0]}":\n${proof.map((p,i)=>`  step ${i+1}: sibling on the ${p.side}  ${p.hash.slice(0,32)}…`).join('\n')}\n\nA verifier with the root and this proof can recompute the path in ${proof.length} hash operations and confirm that the leaf is in the tree, without seeing any other leaf.\n\nThe tree shape must be canonical. Some implementations duplicate the last node when a level has an odd length; others promote it unchanged. Two parties that choose differently compute different roots for the same data.`,
+  steps:leaves.length,units:levels.length,tokens:levels.reduce((s,l)=>s+l.length,0)
+ };
+}
+
+/* --- perceptual hashing --- */
+const DCT_COS=(()=>{
+ const N=32,t=[];
+ for(let u=0;u<N;u++){t[u]=new Float64Array(N);for(let x=0;x<N;x++)t[u][x]=Math.cos((2*x+1)*u*Math.PI/(2*N))}
+ return t;
+})();
+function dct2d(pixels,N){
+ const out=new Float64Array(N*N);
+ for(let u=0;u<N;u++)for(let v=0;v<N;v++){
+  let sum=0;
+  for(let x=0;x<N;x++){const cx=DCT_COS[u][x];for(let y=0;y<N;y++)sum+=pixels[x*N+y]*cx*DCT_COS[v][y]}
+  const cu=u===0?Math.sqrt(1/N):Math.sqrt(2/N);
+  const cv=v===0?Math.sqrt(1/N):Math.sqrt(2/N);
+  out[u*N+v]=cu*cv*sum;
+ }
+ return out;
+}
+function greyResize(source,N){
+ const c=document.createElement('canvas');c.width=N;c.height=N;
+ const ctx=c.getContext('2d');
+ ctx.drawImage(source,0,0,N,N);
+ const data=ctx.getImageData(0,0,N,N).data;
+ const out=new Float64Array(N*N);
+ for(let i=0;i<N*N;i++)out[i]=0.299*data[i*4]+0.587*data[i*4+1]+0.114*data[i*4+2];
+ return out;
+}
+function aHash(px){let s=0;for(const v of px)s+=v;const mean=s/px.length;return [...px].map(v=>v>mean?1:0)}
+function dHash(px,N){const bits=[];for(let y=0;y<N;y++)for(let x=0;x<N-1;x++)bits.push(px[y*N+x]>px[y*N+x+1]?1:0);return bits}
+function pHash(px){
+ const dct=dct2d(px,32);
+ const block=[];
+ for(let u=0;u<8;u++)for(let v=0;v<8;v++){if(u===0&&v===0)continue;block.push(dct[u*32+v])}
+ const sorted=[...block].sort((a,b)=>a-b);
+ const median=sorted[Math.floor(sorted.length/2)];
+ return block.map(v=>v>median?1:0);
+}
+function hamming(a,b){let d=0;for(let i=0;i<Math.min(a.length,b.length);i++)if(a[i]!==b[i])d++;return d}
+function bitsToHex(bits){
+ let out='';
+ for(let i=0;i<bits.length;i+=4){out+=parseInt(bits.slice(i,i+4).join(''),2).toString(16)}
+ return out;
+}
+function drawTestImage(canvas,{shift=0,brightness=1,noise=0}={}){
+ const W=canvas.width,H=canvas.height;
+ const ctx=canvas.getContext('2d');
+ const img=ctx.createImageData(W,H);
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+  const sx=x-shift,sy=y;
+  let v;
+  if(sx<0||sx>=W){v=20}
+  else{
+   const ring=Math.hypot(sx-W/2,sy-H/2);
+   const wave=Math.sin(ring/5)*40;
+   const diag=Math.sin((sx+sy)/7)*30;
+   const patch=(sx>W*0.55&&sy>H*0.55)?70:0;
+   v=Math.max(0,Math.min(255,128+wave+diag+patch));
+  }
+  v=Math.max(0,Math.min(255,v*brightness));
+  if(noise)v=Math.max(0,Math.min(255,v+(Math.random()*2-1)*noise));
+  const i=(y*W+x)*4;
+  img.data[i]=v;img.data[i+1]=v;img.data[i+2]=v;img.data[i+3]=255;
+ }
+ ctx.putImageData(img,0,0);
+}
+function demoPerceptual(){
+ const wrap=document.createElement('div');
+ const row=document.createElement('div');
+ row.style.cssText='display:flex;gap:10px;flex-wrap:wrap';
+ const mk=(label)=>{
+  const d=document.createElement('div');
+  d.style.cssText='flex:1;min-width:150px';
+  const c=document.createElement('canvas');c.width=c.height=128;
+  c.style.cssText='width:100%;border-radius:8px;border:1px solid var(--line);background:var(--bg)';
+  const t=document.createElement('div');t.className='bar-label';t.style.marginTop='5px';t.textContent=label;
+  d.append(c,t);row.append(d);return c;
+ };
+ const cA=mk('original (greyscale test pattern)');
+ const cB=mk('shifted 8 px, brightness x1.12, noise 8');
+ drawTestImage(cA,{});
+ drawTestImage(cB,{shift:8,brightness:1.12,noise:8});
+ const aGrey=greyResize(cA,32),bGrey=greyResize(cB,32);
+ const aGrey8=greyResize(cA,8),bGrey8=greyResize(cB,8);
+ const aGrey9=greyResize(cA,9),bGrey9=greyResize(cB,9);
+ const aA=aHash(greyResize(cA,8)),bA=aHash(greyResize(cB,8));
+ const aD=dHash(greyResize(cA,9),9),bD=dHash(greyResize(cB,9),9);
+ const aP=pHash(greyResize(cA,32)),bP=pHash(greyResize(cB,32));
+ const rows=[
+  ['aHash  8x8 mean',aA,bA,64],
+  ['dHash  9x8 gradient',aD,bD,64],
+  ['pHash  32x32 DCT',aP,bP,63]
+ ];
+ const out=rows.map(([name,a,b,n])=>`${name.padEnd(22)} A=${bitsToHex(a)}  B=${bitsToHex(b)}  distance ${hamming(a,b)} / ${n}`).join('\n');
+ return {
+  encoded:out,
+  html:row.outerHTML,
+  decoded:`The two images are the same pattern with an 8-pixel horizontal shift, a 12% brightness increase and light noise.\n\nObserved distances:\n${rows.map(([n,a,b,t])=>`  ${n.split(' ')[0]}: ${hamming(a,b)} of ${t} bits (${(hamming(a,b)/t*100).toFixed(1)}%)`).join('\n')}\n\nA cryptographic hash of these two images would differ in roughly half of all bits. A perceptual hash changes only slightly.\n\nRules of thumb for 64-bit perceptual hashes: 0 to 5 bits usually means a near duplicate, 6 to 10 bits may be a modified version of the same image, and above about 15 bits the images are typically unrelated. The exact thresholds depend on the corpus and the application.\n\nThese values are not cryptographic. An adversary can craft an image that collides with a target fingerprint.`,
+  steps:2,units:rows.length,tokens:rows.reduce((s,r)=>s+r[3],0)
+ };
+}
+
+function demoSpecialized(text){
+ if(!text.length)throw Error('Enter some text.');
+ const words=text.toLowerCase().match(/[a-z']+/g)||[];
+ // Zobrist on a small board
+ let seed=0x12345678;
+ const rnd=()=>{seed^=seed<<13;seed>>>=0;seed^=seed>>>17;seed^=seed<<5;seed>>>=0;return seed>>>0};
+ const Z=Array.from({length:3},()=>Array.from({length:9},()=>BigInt(rnd())<<32n|BigInt(rnd())));
+ const board=[0,1,0,2,0,0,1,0,2];
+ let zh=0n;board.forEach((p,i)=>{if(p)zh^=Z[p][i]});
+ const zh2=zh^Z[2][0]^Z[1][4];
+ // rolling hash / Rabin-Karp style substring search
+ const BASE=257,MOD=(1n<<61n)-1n;
+ function polyHash(s){
+  let h=0n;
+  for(const ch of s)h=(h*BigInt(BASE)+BigInt(ch.codePointAt(0)))%MOD;
+  return h;
+ }
+ const pattern=words.slice(0,3).join(' ')||'the quick';
+ const target=text.toLowerCase();
+ const found=[];
+ for(let i=0;i+pattern.length<=target.length;i++){
+  if(polyHash(target.slice(i,i+pattern.length))===polyHash(pattern)){
+   if(target.slice(i,i+pattern.length)===pattern)found.push(i);
+  }
+ }
+ // MinHash over word shingles
+ const shingles=new Set();
+ for(let i=0;i+3<=words.length;i++)shingles.add(words.slice(i,i+3).join(' '));
+ const sig=[];
+ for(let k=0;k<8;k++){
+  let m=null;
+  for(const s of shingles){
+   const h=fnv1a32(toBytes(s+'#'+k));
+   if(m===null||h<m)m=h;
+  }
+  sig.push(m===null?0:m);
+ }
+ return {
+  encoded:`Zobrist\n  board: ${board.join(' ')}\n  hash:  0x${hexU64(zh)}\n  after moving piece 1 from square 4 to square 0:\n         0x${hexU64(zh2)}\n  (one XOR out, one XOR in — no rehash of the whole board)\n\nRolling polynomial hash\n  pattern: "${pattern}"\n  matches at offsets: ${found.length?found.join(', '):'none'}\n\nMinHash signature over ${shingles.size} word shingles\n  ${sig.map(x=>hexU32(x)).join('\n  ')}`,
+  decoded:`Zobrist hashing is incremental. A move costs two XOR operations regardless of board size, which is why chess and Go engines use it to index transposition tables.\n\nA polynomial rolling hash lets you slide a window in constant time: subtract the contribution of the outgoing symbol, multiply by the base, add the incoming symbol. Rabin–Karp uses exactly this to search for a pattern in O(n + m) expected time.\n\nMinHash estimates the Jaccard similarity between two sets: the fraction of signature positions that agree approximates |A ∩ B| / |A ∪ B|. With 8 hash functions the estimate is noisy; production systems use 100 to 400.\n\nAll of these are unkeyed. An adversary who knows the base and modulus can craft collisions.`,
+  steps:words.length,units:found.length,tokens:sig.length
+ };
+}
+
+function demoPerfect(text){
+ const keys=parseList(text);
+ if(keys.length<2)throw Error('Enter at least two comma-separated keys.');
+ const n=keys.length;
+ const buckets=new Map();
+ for(const k of keys){
+  const b=fnv1a32(toBytes(k))%n;
+  if(!buckets.has(b))buckets.set(b,[]);
+  buckets.get(b).push(k);
+ }
+ const order=[...buckets.entries()].sort((a,b)=>b[1].length-a[1].length);
+ const slots=new Array(n).fill(null);
+ const disp=new Map();
+ let totalProbes=0;
+ for(const [b,members] of order){
+  let d=0,ok=false;
+  while(!ok&&d<n*16){
+   const used=new Set();ok=true;
+   for(const k of members){
+    const idx=((fnv1a32(toBytes(k))^Math.imul(d,0x9e3779b9))>>>0)%n;
+    totalProbes++;
+    if(slots[idx]!==null||used.has(idx)){ok=false;break}
+    used.add(idx);
+   }
+   if(ok){for(const k of members){const idx=((fnv1a32(toBytes(k))^Math.imul(d,0x9e3779b9))>>>0)%n;slots[idx]=k}disp.set(b,d)}
+   else d++;
+  }
+  if(!ok)throw Error('Construction failed for this key set. Try different keys.');
+ }
+ const lookup=k=>{
+  const b=fnv1a32(toBytes(k))%n;
+  if(!disp.has(b))return null;
+  const d=disp.get(b);
+  const idx=((fnv1a32(toBytes(k))^Math.imul(d,0x9e3779b9))>>>0)%n;
+  return slots[idx]===k?idx:null;
+ };
+ const lines=slots.map((k,i)=>`  slot ${String(i).padStart(2)}  ${k??'(empty)'}`);
+ const collisionTest=keys.map(k=>lookup(k));
+ const absent=['zzz-not-a-key','another-missing-key'].map(k=>`  "${k}" -> ${lookup(k)===null?'not found (slot does not hold it)':'wrong slot'}`);
+ return {
+  encoded:`Keys: ${keys.length}\nSlots: ${n}   (exactly one per key, so this is minimal)\nBuckets with more than one key: ${[...buckets.values()].filter(v=>v.length>1).length}\nTotal probe attempts during construction: ${totalProbes}\n\nSlot table:\n${lines.join('\n')}`,
+  decoded:`Every key maps to its own slot. There are no collisions and no empty slots, so the table is a minimal perfect hash.\n\nLookup uses only the first-level bucket hash and the stored displacement:\n  bucket = fnv1a32(key) mod ${n}\n  slot   = (fnv1a32(key) XOR (displacement * 0x9E3779B9)) mod ${n}\n\nKeys found at their own slot: ${collisionTest.every((v,i)=>v!==null)} of ${keys.length}\n\nKeys that were never inserted:\n${absent.join('\n')}\n\nThis is why a minimal perfect hash is never a complete membership test. Any key maps to some slot. Only comparing the stored key at that slot tells you whether the key is really present.`,
+  steps:keys.length,units:totalProbes,tokens:n
+ };
+}
+
+function demoBloom(text){
+ const items=parseList(text);
+ if(!items.length)throw Error('Enter at least one comma-separated item.');
+ const n=Math.max(items.length,10);
+ const m=Math.ceil(n*9.6);
+ const k=Math.max(1,Math.round((m/n)*Math.LN2));
+ const bits=new Uint8Array(Math.ceil(m/8));
+ const positions=(key,salt)=>{
+  const h1=fnv1a32(toBytes(key));
+  const h2=(murmur3_32(toBytes(key),salt)|1)>>>0;
+  const out=[];
+  for(let i=0;i<k;i++)out.push((h1+Math.imul(i,h2))>>>0);
+  return out.map(x=>x%m);
+ };
+ const add=key=>{for(const p of positions(key,0))bits[p>>3]|=1<<(p&7)};
+ const has=key=>{for(const p of positions(key,0))if(!(bits[p>>3]&(1<<(p&7))))return false;return true};
+ items.forEach(add);
+ let setBits=0;for(const b of bits)setBits+=b.toString(2).split('1').length-1;
+ const fpRate=Math.pow(1-Math.exp(-k*items.length/m),k);
+ // empirical false positive test
+ const trials=2000;
+ let falsePositives=0;
+ let seed=12345;
+ const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed};
+ for(let i=0;i<trials;i++){
+  const candidate='absent-'+rnd().toString(36);
+  if(has(candidate))falsePositives++;
+ }
+ const bitPreview=[...bits].flatMap(b=>b.toString(2).padStart(8,'0').split('').map(Number)).slice(0,m);
+ const grid=bitGrid(bitPreview.slice(0,Math.min(m,320)));
+ return {
+  encoded:`items inserted: ${items.length}\nbits (m): ${m}\nhashes (k): ${k}\nbits set: ${setBits} of ${m} (${(setBits/m*100).toFixed(1)}%)\n\nExample probes:\n${items.slice(0,4).map(x=>`  ${x.padEnd(16)} -> ${positions(x,0).join(', ')}`).join('\n')}\n\nMembership results:\n${items.slice(0,6).map(x=>`  ${x.padEnd(16)} in filter: ${has(x)}`).join('\n')}`,
+  html:grid+'<div class="bar-label">first 320 bits of the filter · filled cells are set</div>',
+  decoded:`Theoretical false-positive rate: ${(fpRate*100).toFixed(2)}%\nEmpirical false positives: ${falsePositives} out of ${trials} absent keys (${(falsePositives/trials*100).toFixed(2)}%)\n\nA Bloom filter never produces a false negative. If a bit is clear, the item is definitely absent.\n\nOptimal k = (m/n) ln 2 = ${k}. At that value the false-positive rate is minimised for the chosen m.\n\nStandard Bloom filters cannot delete. Clearing a bit that another item also set would create a false negative, which is the one error a Bloom filter must never make. Counting Bloom filters replace each bit with a small counter to support deletion at the cost of several times the memory.`,
+  steps:items.length,units:setBits,tokens:m
+ };
+}
+
+function demoCuckoo(text){
+ const items=parseList(text);
+ if(items.length<1)throw Error('Enter at least one comma-separated item.');
+ const bucketCount=Math.max(4,Math.ceil(items.length/2));
+ const bucketSize=4;
+ const buckets=Array.from({length:bucketCount},()=>[]);
+ const fp=k=>{const h=fnv1a32(toBytes(k))>>>0;return (h&0xff)||1};
+ const i1=k=>fnv1a32(toBytes(k))%bucketCount;
+ const i2=(k,i)=>(i^(fnv1a32(new Uint8Array([fp(k)]))>>>0))%bucketCount;
+ const steps=[];
+ let failed=null;
+ for(const k of items){
+  const f=fp(k);
+  let i=i1(k);
+  let cur={k,f,i};
+  let placed=false;
+  for(let attempt=0;attempt<32;attempt++){
+   if(buckets[i].length<bucketSize){buckets[i].push(cur);placed=true;break}
+   const victim=Math.floor(Math.random()*bucketSize);
+   const tmp=buckets[i][victim];
+   buckets[i][victim]=cur;
+   steps.push(`kick ${tmp.k} out of bucket ${i}`);
+   cur=tmp;
+   i=i2(cur.k,cur.i);
+  }
+  if(!placed){failed=k;break}
+ }
+ const lookup=k=>{
+  const f=fp(k),a=i1(k),b=i2(k,a);
+  return buckets[a].some(e=>e.f===f&&e.k===k)||buckets[b].some(e=>e.f===f&&e.k===k);
+ };
+ const lines=buckets.map((b,i)=>`  bucket ${String(i).padStart(2)} (${b.length}/${bucketSize}): ${b.map(e=>e.k).join(', ')||'—'}`);
+ return {
+  encoded:`items: ${items.length}\nbuckets: ${bucketCount}   bucket size: ${bucketSize}\nfingerprint width: 8 bits\n\n${lines.join('\n')}`,
+  decoded:`Relocations performed: ${steps.length}\nConstruction: ${failed?'failed on "'+failed+'" — increase the bucket count':'succeeded'}\n\nLookups:\n${items.slice(0,8).map(k=>`  ${k.padEnd(16)} present: ${lookup(k)}`).join('\n')}\n\nA cuckoo filter stores short fingerprints in two candidate buckets per item. Insert may kick an existing fingerprint into its alternate bucket. This is why it supports deletion, unlike a standard Bloom filter, and why it achieves lower space at low false-positive rates.\n\nAn 8-bit fingerprint gives a false-positive rate near 1/256 per bucket checked. Production filters use 12 to 16 bit fingerprints and 4 to 8 slots per bucket.`,
+  steps:items.length,units:steps.length,tokens:bucketCount*bucketSize
+ };
+}
+
+/* ============================================================
+   Lab dispatcher
+   ============================================================ */
+async function runLab(l,initial){
+ const input=$('#labInput').value;
+ let res;
+ try{
+  if(!initial){$('#labEncoded').textContent='Running…';$('#labDecoded').textContent=''}
+  switch(l.demo){
+   case'hashtable':res=demoHashTable(input);break;
+   case'simplehash':res=demoSimpleHash(input);break;
+   case'fasthash':res=demoFastHash(input);break;
+   case'avalanche':res=await demoAvalanche(input);break;
+   case'cryptohash':res=await demoCryptoHash(input);break;
+   case'merkle':res=await demoMerkle(input);break;
+   case'perceptual':res=demoPerceptual();break;
+   case'specialized':res=demoSpecialized(input);break;
+   case'perfect':res=demoPerfect(input);break;
+   case'bloom':res=demoBloom(input);break;
+   case'cuckoo':res=demoCuckoo(input);break;
+   default:throw Error('No interactive implementation is available for this lesson.');
+  }
+ }catch(e){
+  res={encoded:'Input or runtime error',decoded:e.message,steps:0,units:0,tokens:0};
+ }
+ const el=$('#labEncoded');
+ if(res.html){el.innerHTML=res.html}else{el.textContent=res.encoded}
+ $('#labDecoded').textContent=res.decoded;
+ state.metrics={steps:res.steps||0,units:res.units||0,tokens:res.tokens||0};
+ if(!initial)toast('Lab complete');
+}
+
+/* ============================================================
+   Global bindings
+   ============================================================ */
+function bindGlobal(){
+ $('#themeSelect').onchange=()=>{state.theme=$('#themeSelect').value;applyTheme();save()};
+ $('#printBtn').onclick=()=>print();
+ $('#exportBtn').onclick=exportProgress;
+ $('#importBtn').onclick=()=>$('#importFile').click();
+ $('#importFile').onchange=e=>{if(e.target.files[0])importProgressFile(e.target.files[0]);e.target.value=''};
+ $('#searchInput').oninput=renderTree;
+ $('#chapterFilter').onchange=renderTree;
+ $('#homeLink').onclick=e=>{e.preventDefault();renderHome();history.replaceState(null,'','#home')};
+ $('#courseTree').onclick=e=>{const b=e.target.closest('[data-lesson]');if(b)openLesson(b.dataset.lesson)};
+ document.querySelectorAll('[data-page="home"]').forEach(b=>b.onclick=renderHome);
+ document.querySelectorAll('[data-page="progress"]').forEach(b=>b.onclick=renderProgressPage);
+ document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){e.preventDefault();$('#searchInput').focus()}
+  if(e.key.toLowerCase()==='t'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){
+   state.theme=state.theme==='dark'?'light':state.theme==='light'?'system':'dark';
+   applyTheme();save();
+  }
+ });
+}
+
+function init(){
+ load();
+ applyTheme();
+ CHAPTERS.forEach(c=>{const op=document.createElement('option');op.value=c.id;op.textContent=c.title;$('#chapterFilter').append(op)});
+ bindGlobal();
+ renderTree();
+ const hash=location.hash.replace(/^#/,'');
+ if(hash&&byId[hash])renderLesson(hash);
+ else if(state.current&&byId[state.current])renderLesson(state.current);
+ else renderHome();
+ progress();
+}
+init();
+</script></body></html>
